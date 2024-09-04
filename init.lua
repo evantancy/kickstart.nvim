@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -123,6 +123,16 @@ vim.opt.breakindent = true
 
 -- Save undo history
 vim.opt.undofile = true
+
+-- Tabs and Indentation
+vim.opt.smarttab = true
+vim.opt.autoindent = true
+vim.opt.smartindent = true
+vim.opt.expandtab = true -- Tabs to spaces
+-- vim.opt.tabstop = 4 -- Number of spaces for tab
+-- vim.opt.softtabstop = 4
+-- vim.opt.shiftwidth = 4 -- Number of spaces for indentation
+-- vim.opt.virtualedit = 'block' -- Allow rectangular selections, see https://medium.com/usevim/vim-101-virtual-editing-661c99c05847
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.ignorecase = true
@@ -146,7 +156,7 @@ vim.opt.splitbelow = true
 --  See `:help 'list'`
 --  and `:help 'listchars'`
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣', space = '·', eol = '↴' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -157,8 +167,142 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+-- Align with autocmd.lua
+vim.opt.formatoptions = vim.opt.formatoptions
+  + {
+    c = false,
+    o = false, -- o and O don't continue comments
+    r = true, -- Pressing Enter will continue comments
+  }
+
+-- Backups
+vim.opt.swapfile = false
+vim.opt.writebackup = false
+vim.opt.backup = false
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+--
+-- make Ctrl-C escape
+vim.keymap.set({ 'n', 'x', 'i' }, '<C-c>', '<Esc>', { noremap = true })
+-- navigate around wrapped lines
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true })
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true })
+-- moving lines in visual mode
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true })
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true })
+-- move line text up/down in normal mode
+vim.keymap.set('n', '<leader>j', ':m .+1<CR>==', { noremap = true })
+vim.keymap.set('n', '<leader>k', ':m .-2<CR>==', { noremap = true })
+-- move line text up/down in insert mode
+vim.keymap.set('i', '<c-j>', '<esc>:m .+1<CR>==gi', { noremap = true })
+vim.keymap.set('i', '<c-k>', '<esc>:m .-2<CR>==gi', { noremap = true })
+-- diagnostics
+vim.diagnostic.config {
+  virtual_text = false,
+  severity_sort = true,
+  float = {
+    border = 'rounded',
+    source = true,
+  },
+}
+-- vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', { desc = 'Goto prev [d]iagnostic' })
+-- vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', { desc = 'Goto next [d]iagnostic' })
+-- vim.keymap.set('n', '[c', function()
+--   require('gitsigns').prev_hunk()
+-- end, { desc = 'Goto prev [c]hange' })
+-- vim.keymap.set('n', ']c', function()
+--   require('gitsigns').next_hunk()
+-- end, { desc = 'Goto next [c]hange' })
+--
+-- delete without yanking
+vim.keymap.set({ 'n', 'v' }, '<leader>d', '"_d')
+-- make vim behave properly, like c & C, d & D
+vim.keymap.set('n', 'Y', 'y$', { noremap = true })
+-- maintain cursor in middle while scrolling up/down
+vim.keymap.set('n', '<C-d>', '10<C-d>zz')
+vim.keymap.set('n', '<C-u>', '10<C-u>zz')
+-- maintain cursor in middle while going through search matches
+vim.keymap.set('n', 'n', 'nzzzv', { noremap = true })
+vim.keymap.set('n', 'N', 'Nzzzv', { noremap = true })
+-- maintain cursor at current position when joining lines
+vim.keymap.set('n', '<leader>J', 'mzJ`z', { noremap = true })
+-- break undo sequence using punctuation marks
+vim.keymap.set('i', ',', ',<c-g>u', { noremap = true })
+vim.keymap.set('i', '.', '.<c-g>u', { noremap = true })
+vim.keymap.set('i', '!', '!<c-g>u', { noremap = true })
+vim.keymap.set('i', '?', '?<c-g>u', { noremap = true })
+
+-- replace currently selected text with default register without yanking
+vim.keymap.set('v', 'p', '"_dP', { noremap = true })
+vim.keymap.set('n', '<leader>D', '"_D', { noremap = true })
+vim.keymap.set('n', '<leader>C', '"_C', { noremap = true })
+vim.keymap.set('n', '<leader>c', '"_c', { noremap = true })
+vim.keymap.set('n', '<leader>x', '"_x', { noremap = true })
+
+-- TODO: go through these ...
+--
+-- -- Harpoon
+-- vim.keymap.set('n', '<leader>ha', "<cmd>lua require('harpoon.mark').add_file()<cr>", { desc = '[h]arpoon [a]dd' })
+-- vim.keymap.set('n', '<leader>hs', "<cmd>lua require('harpoon.ui').toggle_quick_menu()<cr>", { desc = '[h]arpoon [s]how' })
+-- -- not really sure what this does atm
+-- -- vim.keymap.set('n', '<leader>ht', "<cmd>lua require('harpoon.cmd-ui').toggle_quick_menu()<cr>", { desc = '[h]arpoon [t]oggle' })
+-- vim.keymap.set('n', '<A-1>', "<cmd>lua require('harpoon.ui').nav_file(1)<cr>")
+-- vim.keymap.set('n', '<A-2>', "<cmd>lua require('harpoon.ui').nav_file(2)<cr>")
+-- vim.keymap.set('n', '<A-3>', "<cmd>lua require('harpoon.ui').nav_file(3)<cr>")
+-- vim.keymap.set('n', '<A-4>', "<cmd>lua require('harpoon.ui').nav_file(4)<cr>")
+-- -- undotree
+-- vim.keymap.set('n', '<leader>u', '<cmd>UndotreeToggle<cr>')
+--
+-- -- resize windows
+-- -- TODO fix for MacOS
+-- vim.keymap.set('n', '<C-left>', '<C-w><', opts)
+-- vim.keymap.set('n', '<C-right>', '<C-w>>', opts)
+-- vim.keymap.set('n', '<C-up>', '<C-w>+', opts)
+-- vim.keymap.set('n', '<C-down>', '<C-w>-', opts)
+--
+-- -- moving around in vim commandline
+-- vim.keymap.set('c', '<c-h>', '<left>')
+-- vim.keymap.set('c', '<c-j>', '<down>')
+-- vim.keymap.set('c', '<c-k>', '<up>')
+-- vim.keymap.set('c', '<c-l>', '<right>')
+-- vim.keymap.set('c', '^', '<home>')
+-- vim.keymap.set('c', '$', '<end>')
+--
+-- -- quickfix list
+-- vim.keymap.set('n', ']q', ':cnext<cr>')
+-- vim.keymap.set('n', '[q', ':cprev<cr>')
+--
+-- -- increment/decrement
+-- vim.keymap.set('n', '+', '<c-a>')
+-- vim.keymap.set('n', '_', '<c-x>')
+-- TODO: go through above
+-- make vim behave
+-- D duplicates highlighted text below
+vim.keymap.set('v', 'D', "y'>p", { noremap = true })
+-- tab while code selected
+vim.keymap.set('v', '<', '<gv', { noremap = true })
+vim.keymap.set('v', '>', '>gv', { noremap = true })
+
+-- Telescope | ff -> find file | fg -> find grep | fb -> find buffer
+-- Telescope | dl -> diagnostics list | fa -> find all
+vim.keymap.set('n', '<leader>vrc', function()
+  require('telescope.builtin').find_files {
+    prompt_title = '< VimRC Find Files >',
+    cwd = '$DOTFILES',
+    hidden = true,
+  }
+end)
+vim.keymap.set('n', '<leader>vrg', function()
+  require('telescope.builtin').live_grep {
+    prompt_title = '< VimRC Live Grep >',
+    cwd = '$DOTFILES',
+  }
+end)
+-- Trouble
+vim.keymap.set('n', '<leader>tt', function()
+  require('trouble').toggle { auto_preview = false }
+end)
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
@@ -190,6 +334,11 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- split window management
+-- vim.keymap.set('n', 'sh', ':split<CR><C-w>w', { silent = true, desc = '[s]plit [h]orizontally' })
+-- vim.keymap.set('n', 'sv', ':vsplit<CR><C-w>w', { silent = true, desc = '[s]plit [v]ertically' })
+-- vim.keymap.set('n', 'sc', '<c-w>o<cr>', { silent = true, desc = '[s]plit [c]lose, all other splits but active split' })
+--
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -200,7 +349,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
-    vim.highlight.on_yank()
+    vim.highlight.on_yank { timeout = 300 }
   end,
 })
 
@@ -247,11 +396,52 @@ require('lazy').setup({
     'lewis6991/gitsigns.nvim',
     opts = {
       signs = {
-        add = { text = '+' },
-        change = { text = '~' },
+        add = { text = '┃' },
+        change = { text = '┃' },
         delete = { text = '_' },
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
+        untracked = { text = '┆' },
+      },
+      signs_staged = {
+        add = { text = '┃' },
+        change = { text = '┃' },
+        delete = { text = '_' },
+        topdelete = { text = '‾' },
+        changedelete = { text = '~' },
+        untracked = { text = '┆' },
+      },
+      signs_staged_enable = true,
+      signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
+      numhl = false, -- Toggle with `:Gitsigns toggle_numhl`
+      linehl = false, -- Toggle with `:Gitsigns toggle_linehl`
+      word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
+      watch_gitdir = {
+        follow_files = true,
+      },
+      auto_attach = true,
+      attach_to_untracked = false,
+      current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
+      current_line_blame_opts = {
+        virt_text = true,
+        virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+        delay = 1000,
+        ignore_whitespace = false,
+        virt_text_priority = 100,
+        use_focus = true,
+      },
+      current_line_blame_formatter = '<author>, <author_time:%R> - <summary>',
+      sign_priority = 6,
+      update_debounce = 100,
+      status_formatter = nil, -- Use default
+      max_file_length = 40000, -- Disable if file is longer than this (in lines)
+      preview_config = {
+        -- Options passed to nvim_open_win
+        border = 'single',
+        style = 'minimal',
+        relative = 'cursor',
+        row = 0,
+        col = 1,
       },
     },
   },
@@ -368,7 +558,7 @@ require('lazy').setup({
       -- type in the prompt window. You'll see a list of `help_tags` options and
       -- a corresponding preview of the help.
       --
-      -- Two important keymaps to use while in Telescope are:
+      -- NOTE: Two important keymaps to use while in Telescope are:
       --  - Insert mode: <c-/>
       --  - Normal mode: ?
       --
@@ -378,20 +568,73 @@ require('lazy').setup({
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
+
+      local actions = require 'telescope.actions'
+      local sorters = require 'telescope.sorters'
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
+        defaults = {
+          mappings = {
+            i = {
+              ['<c-enter>'] = 'to_fuzzy_refine',
+              ['<C-j>'] = actions.move_selection_next,
+              ['<C-k>'] = actions.move_selection_previous,
+              ['<C-q>'] = actions.send_to_qflist,
+            },
+            n = {
+              ['<C-c>'] = actions.close,
+            },
+          },
+          dynamic_preview_title = true,
+          -- history = false,
+          layout_strategy = 'vertical',
+          -- layout_config = {
+          --   scroll_speed = 10,
+          --   horizontal = {
+          --     height = 0.98,
+          --     preview_cutoff = 80,
+          --     preview_width = 0.7,
+          --     prompt_position = 'top',
+          --     width = 0.98,
+          --   },
+          -- },
+          vimgrep_arguments = {
+            'rg',
+            -- '--color=never',
+            '--no-heading',
+            '--with-filename',
+            '--line-number',
+            '--column',
+            '--hidden',
+            '--smart-case',
+          },
+          prompt_prefix = '> ',
+          selection_caret = '> ',
+          color_devicons = true,
+          path_display = {
+            shorten = { len = 2, exclude = { 1, -1 } },
+          },
+          file_ignore_patterns = { 'node_modules/.*', '%.git/.*', '%.idea/.*', '%.vscode/.*' },
+          sorting_strategy = 'ascending',
+          file_sorter = sorters.get_fzf_sorter,
+          file_previewer = require('telescope.previewers').vim_buffer_cat.new,
+          grep_previewer = require('telescope.previewers').vim_buffer_vimgrep.new,
+          qflist_previewer = require('telescope.previewers').vim_buffer_qflist.new,
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
           },
+        },
+        fzf = {
+          fuzzy = true, -- false will only do exact matching
+          override_generic_sorter = true, -- override the generic sorter
+          override_file_sorter = true, -- override the file sorter
+          -- the default case_mode is "smart_case"
+          case_mode = 'smart_case', -- or "ignore_case" or "respect_case"
         },
       }
 
@@ -435,6 +678,13 @@ require('lazy').setup({
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
     end,
+  },
+  {
+    'lukas-reineke/indent-blankline.nvim',
+    main = 'ibl',
+    ---@module "ibl"
+    ---@type ibl.config
+    opts = {},
   },
 
   -- LSP Plugins
@@ -520,7 +770,7 @@ require('lazy').setup({
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
-          map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+          map('gi', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
 
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
@@ -535,6 +785,9 @@ require('lazy').setup({
           --  Similar to document symbols, except searches over your entire project.
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
+          map('gs', vim.lsp.buf.signature_help, '[S]ignature [H]elp')
+
+          map('K', vim.lsp.buf.hover, 'Show LSP shit under cursor')
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
           map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
@@ -608,6 +861,7 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
+        -- pylsp = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -701,6 +955,24 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
+        python = function(bufnr)
+          local conform = require 'conform'
+          local formatters = {}
+
+          if conform.get_formatter_info('ruff_fix', bufnr).available then
+            table.insert(formatters, 'ruff_fix')
+          end
+
+          if conform.get_formatter_info('ruff_format', bufnr).available then
+            table.insert(formatters, 'ruff_format')
+          end
+
+          if #formatters == 0 then
+            formatters = { 'isort', 'black' }
+          end
+
+          return formatters
+        end,
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -752,6 +1024,7 @@ require('lazy').setup({
 
       cmp.setup {
         snippet = {
+          -- you must specify a snippet engine
           expand = function(args)
             luasnip.lsp_expand(args.body)
           end,
@@ -765,12 +1038,17 @@ require('lazy').setup({
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
           ['<C-n>'] = cmp.mapping.select_next_item(),
+          ['<C-j>'] = cmp.mapping.select_next_item(),
           -- Select the [p]revious item
           ['<C-p>'] = cmp.mapping.select_prev_item(),
+          ['<C-k>'] = cmp.mapping.select_prev_item(),
+          -- Select the [p]revious item
 
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-d>'] = cmp.mapping.scroll_docs(4),
 
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
@@ -787,6 +1065,8 @@ require('lazy').setup({
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
           ['<C-Space>'] = cmp.mapping.complete {},
+          -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+          ['<CR>'] = cmp.mapping.confirm { select = true },
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  So if you have a snippet that's like:
@@ -818,6 +1098,7 @@ require('lazy').setup({
           },
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
+          { name = 'buffer' },
           { name = 'path' },
         },
       }
@@ -917,12 +1198,12 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
