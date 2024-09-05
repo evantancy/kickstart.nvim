@@ -182,12 +182,15 @@ vim.opt.backup = false
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
---
+
 -- make Ctrl-C escape
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-c>', '<Esc>', { noremap = true })
 -- navigate around wrapped lines
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true })
+-- navigate buffer
+vim.keymap.set('n', '<tab>', '<cmd>bnext<cr>', { noremap = true })
+vim.keymap.set('n', '<s-tab>', '<cmd>bprevious<cr>', { noremap = true })
 -- moving lines in visual mode
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true })
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true })
@@ -206,6 +209,7 @@ vim.diagnostic.config {
     source = true,
   },
 }
+
 -- vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', { desc = 'Goto prev [d]iagnostic' })
 -- vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', { desc = 'Goto next [d]iagnostic' })
 -- vim.keymap.set('n', '[c', function()
@@ -214,7 +218,7 @@ vim.diagnostic.config {
 -- vim.keymap.set('n', ']c', function()
 --   require('gitsigns').next_hunk()
 -- end, { desc = 'Goto next [c]hange' })
---
+
 -- delete without yanking
 vim.keymap.set({ 'n', 'v' }, '<leader>d', '"_d')
 -- make vim behave properly, like c & C, d & D
@@ -232,25 +236,22 @@ vim.keymap.set('i', ',', ',<c-g>u', { noremap = true })
 vim.keymap.set('i', '.', '.<c-g>u', { noremap = true })
 vim.keymap.set('i', '!', '!<c-g>u', { noremap = true })
 vim.keymap.set('i', '?', '?<c-g>u', { noremap = true })
-
 -- replace currently selected text with default register without yanking
 vim.keymap.set('v', 'p', '"_dP', { noremap = true })
 vim.keymap.set('n', '<leader>D', '"_D', { noremap = true })
 vim.keymap.set('n', '<leader>C', '"_C', { noremap = true })
 vim.keymap.set('n', '<leader>c', '"_c', { noremap = true })
 vim.keymap.set('n', '<leader>x', '"_x', { noremap = true })
+-- navigate TODO items
+vim.keymap.set('n', ']t', function()
+  require('todo-comments').jump_next()
+end, { desc = 'Next [T]ODO comment' })
 
+vim.keymap.set('n', '[t', function()
+  require('todo-comments').jump_prev()
+end, { desc = 'Previous [T]ODO comment' })
 -- TODO: go through these ...
 --
--- -- Harpoon
--- vim.keymap.set('n', '<leader>ha', "<cmd>lua require('harpoon.mark').add_file()<cr>", { desc = '[h]arpoon [a]dd' })
--- vim.keymap.set('n', '<leader>hs', "<cmd>lua require('harpoon.ui').toggle_quick_menu()<cr>", { desc = '[h]arpoon [s]how' })
--- -- not really sure what this does atm
--- -- vim.keymap.set('n', '<leader>ht', "<cmd>lua require('harpoon.cmd-ui').toggle_quick_menu()<cr>", { desc = '[h]arpoon [t]oggle' })
--- vim.keymap.set('n', '<A-1>', "<cmd>lua require('harpoon.ui').nav_file(1)<cr>")
--- vim.keymap.set('n', '<A-2>', "<cmd>lua require('harpoon.ui').nav_file(2)<cr>")
--- vim.keymap.set('n', '<A-3>', "<cmd>lua require('harpoon.ui').nav_file(3)<cr>")
--- vim.keymap.set('n', '<A-4>', "<cmd>lua require('harpoon.ui').nav_file(4)<cr>")
 -- -- undotree
 -- vim.keymap.set('n', '<leader>u', '<cmd>UndotreeToggle<cr>')
 --
@@ -298,10 +299,6 @@ vim.keymap.set('n', '<leader>vrg', function()
     prompt_title = '< VimRC Live Grep >',
     cwd = '$DOTFILES',
   }
-end)
--- Trouble
-vim.keymap.set('n', '<leader>tt', function()
-  require('trouble').toggle { auto_preview = false }
 end)
 
 -- Clear highlights on search when pressing <Esc> in normal mode
@@ -641,12 +638,18 @@ require('lazy').setup({
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
+      pcall(require('telescope').load_extension, 'todo-comments')
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>sf', function()
+        builtin.find_files {
+          -- hidden = true,
+          find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' },
+        }
+      end, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
@@ -654,6 +657,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[S]each open [B]uffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -1124,7 +1128,28 @@ require('lazy').setup({
   },
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  {
+    'folke/todo-comments.nvim',
+    event = 'VimEnter',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    opts = {
+      signs = false,
+      search = {
+        command = 'rg',
+        args = {
+          '--color=never',
+          '--no-heading',
+          '--with-filename',
+          '--line-number',
+          '--column',
+        },
+        -- regex that will be used to match keywords.
+        -- don't replace the (KEYWORDS) placeholder
+        pattern = [[\b(KEYWORDS):]], -- ripgrep regex
+        -- pattern = [[\b(KEYWORDS)\b]], -- match without the extra colon. You'll likely get false positives
+      },
+    },
+  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -1142,7 +1167,8 @@ require('lazy').setup({
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
+      -- NOTE: remove this in favour of nvim-surround
+      -- require('mini.surround').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
@@ -1210,7 +1236,7 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
