@@ -183,6 +183,27 @@ vim.opt.backup = false
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- toggle diagnostics for current buffer
+vim.keymap.set('n', '<leader>td', function()
+  vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+end, { silent = true, noremap = true, desc = '[T]oggle [D]iagnostics' })
+-- show inline errors
+vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+  -- Enable underline, use default values
+  underline = true,
+  -- Enable virtual text, override spacing to 4
+  virtual_text = {
+    spacing = 4,
+  },
+  -- Use a function to dynamically turn signs off
+  -- and on, using buffer local variables
+  signs = function(namespace, bufnr)
+    return vim.b[bufnr].show_signs == true
+  end,
+  -- Disable a feature
+  update_in_insert = false,
+})
+
 -- make Ctrl-C escape
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-c>', '<Esc>', { noremap = true })
 -- navigate around wrapped lines
@@ -865,10 +886,14 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         pyright = {
+          -- use Ruff's import organizer
+          disableOrganizeImports = true,
           filetypes = { 'python' },
           settings = {
             python = {
               analysis = {
+                -- Ignore all files for analysis to exlusively use Ruff for linting
+                -- ignore = { '*' },
                 autoSearchPaths = true,
                 diagnosticMode = 'workspace',
                 useLibraryCodeForTypes = true,
@@ -903,7 +928,6 @@ require('lazy').setup({
           },
         },
       }
-
       -- Ensure the servers and tools above are installed
       --  To check the current status of installed tools and/or manually install
       --  other tools, you can run
@@ -918,6 +942,24 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
       })
+
+      -- Function to check if "ruff" command is available
+      local function is_ruff_available()
+        local handle = io.popen 'command -v ruff'
+        if handle == nil then
+          return false
+        end
+        local result = handle:read '*a'
+        handle:close()
+        return result ~= ''
+      end
+
+      -- NOTE: this works but just remember to enter the venv before entering nvim
+      if not is_ruff_available() then
+        vim.list_extend(ensure_installed, {
+          'ruff',
+        })
+      end
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       require('mason-lspconfig').setup {
@@ -970,25 +1012,10 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        python = function(bufnr)
-          local conform = require 'conform'
-          local formatters = {}
-
-          if conform.get_formatter_info('ruff_fix', bufnr).available then
-            table.insert(formatters, 'ruff_fix')
-          end
-
-          if conform.get_formatter_info('ruff_format', bufnr).available then
-            table.insert(formatters, 'ruff_format')
-          end
-
-          if #formatters == 0 then
-            formatters = { 'isort', 'black' }
-          end
-
-          return formatters
-        end,
+        python = {
+          'ruff_fix',
+          'ruff_format',
+        },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
