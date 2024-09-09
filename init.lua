@@ -864,7 +864,19 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
+        pyright = {
+          filetypes = { 'python' },
+          settings = {
+            python = {
+              analysis = {
+                autoSearchPaths = true,
+                diagnosticMode = 'workspace',
+                useLibraryCodeForTypes = true,
+                typeCheckingMode = 'basic',
+              },
+            },
+          },
+        },
         -- pylsp = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -1001,6 +1013,8 @@ require('lazy').setup({
           return 'make install_jsregexp'
         end)(),
         dependencies = {
+          'onsails/lspkind.nvim',
+
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
@@ -1025,6 +1039,17 @@ require('lazy').setup({
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
       luasnip.config.setup {}
+
+      local lspkind = require 'lspkind'
+      local source_mapping = {
+        buffer = '[Buf]',
+        nvim_lsp = '[LSP]',
+        copilot = '[Copilot]',
+        nvim_lua = '[Lua]',
+        cmp_tabnine = '[TN]',
+        path = '[Path]',
+        luasnip = '[snip]',
+      }
 
       cmp.setup {
         snippet = {
@@ -1104,6 +1129,25 @@ require('lazy').setup({
           { name = 'luasnip' },
           { name = 'buffer' },
           { name = 'path' },
+        },
+        performance = {
+          max_view_entries = 30,
+        },
+        formatting = {
+          format = lspkind.cmp_format {
+            -- maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+            -- can also be a function to dynamically calculate max width such as
+            maxwidth = function()
+              return math.floor(0.45 * vim.o.columns)
+            end,
+            ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+            show_labelDetails = true, -- show labelDetails in menu. Disabled by default
+            -- The function below will be called before any actual modifications from lspkind
+            -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+            -- before = function(entry, vim_item)
+            --   return vim_item
+            -- end,
+          },
         },
       }
     end,
