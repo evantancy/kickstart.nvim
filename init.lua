@@ -314,13 +314,13 @@ vim.keymap.set('n', '<leader>vrc', function()
     cwd = '$DOTFILES',
     hidden = true,
   }
-end)
+end, { desc = '[V]im[RC] Find Files' })
 vim.keymap.set('n', '<leader>vrg', function()
   require('telescope.builtin').live_grep {
     prompt_title = '< VimRC Live Grep >',
     cwd = '$DOTFILES',
   }
-end)
+end, { desc = '[V]imRC Live [G]rep' })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
