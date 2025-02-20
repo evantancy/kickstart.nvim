@@ -123,15 +123,18 @@ vim.opt.breakindent = true
 
 -- Save undo history
 vim.opt.undofile = true
+vim.cmd [[
+    set undodir=$XDG_DATA_HOME/.vim/undodir
+  ]]
 
 -- Tabs and Indentation
 vim.opt.smarttab = true
 vim.opt.autoindent = true
 vim.opt.smartindent = true
 vim.opt.expandtab = true -- Tabs to spaces
--- vim.opt.tabstop = 4 -- Number of spaces for tab
--- vim.opt.softtabstop = 4
--- vim.opt.shiftwidth = 4 -- Number of spaces for indentation
+vim.opt.tabstop = 4 -- Number of spaces for tab
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4 -- Number of spaces for indentation
 -- vim.opt.virtualedit = 'block' -- Allow rectangular selections, see https://medium.com/usevim/vim-101-virtual-editing-661c99c05847
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
@@ -171,7 +174,7 @@ vim.opt.scrolloff = 10
 vim.opt.formatoptions = vim.opt.formatoptions
   + {
     c = false,
-    o = false, -- o and O don't continue comments
+    o = true, -- o and O don't continue comments
     r = true, -- Pressing Enter will continue comments
   }
 
