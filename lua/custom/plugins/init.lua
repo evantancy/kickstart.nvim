@@ -62,6 +62,15 @@ return {
     version = false, -- set this if you want to always pull the latest change
     opts = {
       -- add any opts here
+      provider = 'openai',
+      openai = {
+        endpoint = 'https://openrouter.ai/api/v1',
+        model = 'o3-mini', -- your desired model (or use gpt-4o, etc.)
+        timeout = 30000, -- timeout in milliseconds
+        temperature = 0, -- adjust if needed
+        max_tokens = 4096,
+        reasoning_effort = 'high', -- only supported for "o" models
+      },
     },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = 'make',
