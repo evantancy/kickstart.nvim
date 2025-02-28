@@ -90,6 +90,13 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.g.inlay_hints_visible = true
+-- Set filetype to `bigfile` for files larger than 1.5 MB
+-- Only vim syntax will be enabled (with the correct filetype)
+-- LSP, treesitter and other ft plugins will be disabled.
+-- mini.animate will also be disabled.
+vim.g.bigfile_size = 1024 * 1024 * 1.5 -- 1.5 MB
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
@@ -295,8 +302,8 @@ end, { desc = 'Previous [T]ODO comment' })
 -- vim.keymap.set('c', '$', '<end>')
 --
 -- -- quickfix list
--- vim.keymap.set('n', ']q', ':cnext<cr>')
--- vim.keymap.set('n', '[q', ':cprev<cr>')
+vim.keymap.set('n', ']q', ':cnext<cr>')
+vim.keymap.set('n', '[q', ':cprev<cr>')
 --
 -- -- increment/decrement
 -- vim.keymap.set('n', '+', '<c-a>')
@@ -356,9 +363,10 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- split window management
--- vim.keymap.set('n', 'sh', ':split<CR><C-w>w', { silent = true, desc = '[s]plit [h]orizontally' })
--- vim.keymap.set('n', 'sv', ':vsplit<CR><C-w>w', { silent = true, desc = '[s]plit [v]ertically' })
--- vim.keymap.set('n', 'sc', '<c-w>o<cr>', { silent = true, desc = '[s]plit [c]lose, all other splits but active split' })
+
+vim.keymap.set('n', 'sh', ':split<CR><C-w>w', { silent = true, desc = '[s]plit [h]orizontally' })
+vim.keymap.set('n', 'sv', ':vsplit<CR><C-w>w', { silent = true, desc = '[s]plit [v]ertically' })
+vim.keymap.set('n', 'sc', '<c-w>o<cr>', { silent = true, desc = '[s]plit [c]lose, all other splits but active split' })
 --
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -371,6 +379,27 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.highlight.on_yank { timeout = 300 }
+  end,
+})
+
+vim.filetype.add {
+  pattern = {
+    ['.*'] = {
+      function(path, buf)
+        return vim.bo[buf].filetype ~= 'bigfile' and path and vim.fn.getfsize(path) > vim.g.bigfile_size and 'bigfile' or nil
+      end,
+    },
+  },
+}
+
+vim.api.nvim_create_autocmd({ 'FileType' }, {
+  group = vim.api.nvim_create_augroup('bigfile', { clear = true }),
+  pattern = 'bigfile',
+  callback = function(ev)
+    vim.b.minianimate_disable = true
+    vim.schedule(function()
+      vim.bo[ev.buf].syntax = vim.filetype.match { buf = ev.buf } or ''
+    end)
   end,
 })
 
@@ -794,15 +823,19 @@ require('lazy').setup({
           map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
 
           -- Find references for the word under your cursor.
+          -- goto references
+          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
+          -- goto implementation
           map('gi', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
 
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
+          --  goto type definition
           map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
@@ -813,7 +846,7 @@ require('lazy').setup({
           --  Similar to document symbols, except searches over your entire project.
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
-          map('gs', vim.lsp.buf.signature_help, '[S]ignature [H]elp')
+          -- map('gs', vim.lsp.buf.signature_help, '[G]oto [S]ignature')
 
           map('K', vim.lsp.buf.hover, 'Show LSP shit under cursor')
           -- Rename the variable under your cursor.
@@ -1307,6 +1340,15 @@ require('lazy').setup({
         additional_vim_regex_highlighting = { 'ruby' },
       },
       indent = { enable = true, disable = { 'ruby' } },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = '<c-space>',
+          node_incremental = '<c-space>',
+          scope_incremental = '<c-s>',
+          node_decremental = '<c-backspace>',
+        },
+      },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:

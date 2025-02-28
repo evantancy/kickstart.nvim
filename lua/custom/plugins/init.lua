@@ -4,6 +4,26 @@
 -- See the kickstart.nvim README for more information
 return {
   {
+    'chrisgrieser/nvim-puppeteer',
+    lazy = false, -- plugin lazy-loads itself. Can also load on filetypes.
+  },
+  {
+    'ggandor/leap.nvim',
+    dependencies = {
+      'tpope/vim-repeat',
+    },
+    config = function()
+      local leap = require 'leap'
+      vim.keymap.set({ 'n', 'x' }, 'gs', '<Plug>(leap)')
+      vim.keymap.set('o', 'gs', '<Plug>(leap-forward)')
+      -- vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
+      -- vim.keymap.set('o', 'S', '<Plug>(leap-backward)')
+    end,
+    opts = {
+      case_insensitive_regex = true,
+    },
+  },
+  {
     'zbirenbaum/copilot.lua',
     cmd = 'Copilot',
     event = 'InsertEnter',
@@ -26,16 +46,16 @@ return {
         },
         suggestion = {
           enabled = true,
-          auto_trigger = false,
+          auto_trigger = true,
           hide_during_completion = true,
           debounce = 75,
           keymap = {
-            accept = '<M-l>',
+            accept = '<tab>',
             accept_word = false,
             accept_line = false,
-            next = '<M-]>',
-            prev = '<M-[>',
-            dismiss = '<C-]>',
+            next = '<C-n>',
+            prev = '<C-p>',
+            dismiss = '<C-c>',
           },
         },
         filetypes = {
@@ -65,11 +85,11 @@ return {
       provider = 'openai',
       openai = {
         endpoint = 'https://openrouter.ai/api/v1',
-        model = 'o3-mini', -- your desired model (or use gpt-4o, etc.)
+        model = 'anthropic/claude-3.7-sonnet', -- your desired model (or use gpt-4o, etc.)
         timeout = 30000, -- timeout in milliseconds
         temperature = 0, -- adjust if needed
         max_tokens = 4096,
-        reasoning_effort = 'high', -- only supported for "o" models
+        -- reasoning_effort = 'high', -- only supported for "o" models
       },
     },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
