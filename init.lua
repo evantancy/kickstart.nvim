@@ -212,11 +212,6 @@ vim.cmd [[
     autocmd FileType * setlocal formatoptions-=c formatoptions+=r formatoptions-=o
 ]]
 
--- Backups
-vim.opt.swapfile = false
-vim.opt.writebackup = false
-vim.opt.backup = false
-
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -772,7 +767,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>se', builtin.diagnostics, { desc = '[S]earch [E]rrorsand Diagnostics' })
+      vim.keymap.set('n', '<leader>se', builtin.diagnostics, { desc = '[S]earch [E]rrors and Diagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
@@ -823,7 +818,6 @@ require('lazy').setup({
       },
     },
   },
-  -- { 'Bilal2453/luvit-meta', lazy = true },
   {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
@@ -840,17 +834,6 @@ require('lazy').setup({
 
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
-    },
-    opts = {
-      diagnostics = {
-        underline = true,
-        update_in_insert = false,
-        virtual_text = {
-          prefix = '',
-          spacing = 4,
-          source = 'if_many',
-        },
-      },
     },
     config = function()
       -- Brief aside: **What is LSP?**
@@ -902,7 +885,6 @@ require('lazy').setup({
 
           -- Find references for the word under your cursor.
           -- goto references
-          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
@@ -1006,7 +988,7 @@ require('lazy').setup({
             [vim.diagnostic.severity.INFO] = '󰋽 ',
             [vim.diagnostic.severity.HINT] = '󰌶 ',
           },
-        } or {},
+        },
         virtual_text = {
           source = 'if_many',
           spacing = 2,
