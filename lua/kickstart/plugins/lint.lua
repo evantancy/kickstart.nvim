@@ -10,9 +10,10 @@ return {
         python = { 'ruff' },
       }
 
-      -- TODO: understand what this does
-      local ns = lint.get_namespace 'ruff'
-      vim.diagnostic.config({ virtual_text = true }, ns)
+      -- -- NOTE: here you can define diagnostics per namespace,
+      -- but this will override your other settings
+      -- local ns = lint.get_namespace 'ruff'
+      -- vim.diagnostic.config({ virtual_text = true }, ns)
 
       -- To allow other plugins to add linters to require('lint').linters_by_ft,
       -- instead set linters_by_ft like this:

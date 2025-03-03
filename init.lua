@@ -90,7 +90,6 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
-vim.g.inlay_hints_visible = true
 -- Set filetype to `bigfile` for files larger than 1.5 MB
 -- Only vim syntax will be enabled (with the correct filetype)
 -- LSP, treesitter and other ft plugins will be disabled.
@@ -164,11 +163,10 @@ vim.opt.smartcase = true
 vim.opt.signcolumn = 'yes'
 
 -- Decrease update time
-vim.opt.updatetime = 750
+vim.opt.updatetime = 300
 
 -- Decrease mapped sequence wait time
--- Displays which-key popup sooner
-vim.opt.timeoutlen = 750
+vim.opt.timeoutlen = 300
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -219,22 +217,22 @@ vim.cmd [[
 vim.keymap.set('n', '<leader>td', function()
   vim.diagnostic.enable(not vim.diagnostic.is_enabled())
 end, { silent = true, noremap = true, desc = '[T]oggle [D]iagnostics' })
--- show inline errors
-vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-  -- Enable underline, use default values
-  underline = true,
-  -- Enable virtual text, override spacing to 4
-  virtual_text = {
-    spacing = 4,
-  },
-  -- Use a function to dynamically turn signs off
-  -- and on, using buffer local variables
-  signs = function(namespace, bufnr)
-    return vim.b[bufnr].show_signs == true
-  end,
-  -- Disable a feature
-  update_in_insert = false,
-})
+-- -- show inline errors
+-- vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+--   -- Enable underline, use default values
+--   underline = true,
+--   -- Enable virtual text, override spacing to 4
+--   virtual_text = {
+--     spacing = 4,
+--   },
+--   -- Use a function to dynamically turn signs off
+--   -- and on, using buffer local variables
+--   signs = function(namespace, bufnr)
+--     return vim.b[bufnr].show_signs == true
+--   end,
+--   -- Disable a feature
+--   update_in_insert = false,
+-- })
 
 -- make Ctrl-C escape
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-c>', '<Esc>', { noremap = true })
@@ -253,39 +251,6 @@ vim.keymap.set('n', '<leader>k', ':m .-2<CR>==', { noremap = true })
 -- move line text up/down in insert mode
 vim.keymap.set('i', '<c-j>', '<esc>:m .+1<CR>==gi', { noremap = true })
 vim.keymap.set('i', '<c-k>', '<esc>:m .-2<CR>==gi', { noremap = true })
--- diagnostics
--- vim.diagnostic.config {
---   title = false,
---   underline = true,
---   virtual_text = true,
---   signs = {
---     text = {
---       [vim.diagnostic.severity.ERROR] = 'E',
---       [vim.diagnostic.severity.WARN] = 'W',
---       [vim.diagnostic.severity.HINT] = 'H',
---       [vim.diagnostic.severity.INFO] = 'I',
---     },
---   },
---   -- update_in_insert = false,
---   severity_sort = true,
---   float = {
---     source = 'if_many',
---     style = 'minimal',
---     border = 'rounded',
---     -- header = '',
---     -- prefix = '',
---   },
---   inlay_hints = {
---     enabled = true,
---     exclude = { 'vue', 'TelescopePrompt' }, -- filetypes for which you don't want to enable inlay hints
---   },
--- }
--- local signs = { Error = ' ', Warning = ' ', Hint = ' ', Information = ' ' }
--- for type, icon in pairs(signs) do
---   local hl = 'Diagnostics' .. type
---   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = '' })
--- end
-
 -- delete without yanking
 vim.keymap.set({ 'n', 'v' }, '<leader>d', '"_d')
 -- make vim behave properly, like c & C, d & D
