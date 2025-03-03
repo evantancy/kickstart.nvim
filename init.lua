@@ -113,6 +113,8 @@ vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
+vim.opt.errorbells = false -- Disable annoying sounds
+vim.opt.iskeyword = vim.opt.iskeyword + '-' -- Treat dash separated words as a word text object
 
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
@@ -125,14 +127,24 @@ vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'
 end)
 
--- Enable break indent
+-- Tabs and Indentation
+vim.opt.smarttab = true
+vim.opt.autoindent = true
+vim.opt.smartcase = true
+vim.opt.smartindent = true
 vim.opt.breakindent = true
+vim.opt.expandtab = true -- Tabs to spacesbreakindent
+vim.opt.tabstop = 4 -- Number of spaces for tab
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4 -- Number of spaces for indentation
+vim.opt.virtualedit = 'block' -- Allow rectangular selections, see https://medium.com/usevim/vim-101-virtual-editing-661c99c05847
 
 -- Save undo history
 vim.opt.undofile = true
 vim.cmd [[
     set undodir=$XDG_DATA_HOME/.vim/undodir
   ]]
+vim.opt.syntax = 'enable' -- Enable syntax highlighting
 
 -- Tabs and Indentation
 vim.opt.smarttab = true
@@ -152,11 +164,11 @@ vim.opt.smartcase = true
 vim.opt.signcolumn = 'yes'
 
 -- Decrease update time
-vim.opt.updatetime = 250
+vim.opt.updatetime = 750
 
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
-vim.opt.timeoutlen = 300
+vim.opt.timeoutlen = 750
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -171,19 +183,34 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣', space = '·', eol
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
 
--- Show which line your cursor is on
-vim.opt.cursorline = true
-
--- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+-- Aesthetics
+vim.opt.title = true
+vim.opt.colorcolumn = '80' -- Show column
+vim.opt.linebreak = true -- Break by word, not character
+vim.opt.ruler = true
+vim.opt.relativenumber = true -- Relative line numbers
+vim.opt.scrolloff = 10 -- Keep X lines above/below cursor when scrolling
+vim.opt.cursorline = true -- Show cursor position all the time
+vim.opt.cursorline = true -- Show which line your cursor is on
+vim.opt.scrolloff = 10 -- Minimal number of screen lines to keep above and below the cursor.
+-- vim.opt.cursorlineopt = 'number,screenline' -- disable highlighting the entire line
+-- Backups
+vim.opt.swapfile = false
+vim.opt.writebackup = false
+vim.opt.backup = false
 
 -- Align with autocmd.lua
 vim.opt.formatoptions = vim.opt.formatoptions
   + {
     c = false,
-    o = true, -- o and O don't continue comments
+    o = false, -- o and O don't continue comments
     r = true, -- Pressing Enter will continue comments
   }
+
+-- Disable automatic comment insertion, except when pressing Enter
+vim.cmd [[
+    autocmd FileType * setlocal formatoptions-=c formatoptions+=r formatoptions-=o
+]]
 
 -- Backups
 vim.opt.swapfile = false
@@ -232,23 +259,37 @@ vim.keymap.set('n', '<leader>k', ':m .-2<CR>==', { noremap = true })
 vim.keymap.set('i', '<c-j>', '<esc>:m .+1<CR>==gi', { noremap = true })
 vim.keymap.set('i', '<c-k>', '<esc>:m .-2<CR>==gi', { noremap = true })
 -- diagnostics
-vim.diagnostic.config {
-  virtual_text = false,
-  severity_sort = true,
-  float = {
-    border = 'rounded',
-    source = true,
-  },
-}
-
--- vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', { desc = 'Goto prev [d]iagnostic' })
--- vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', { desc = 'Goto next [d]iagnostic' })
--- vim.keymap.set('n', '[c', function()
---   require('gitsigns').prev_hunk()
--- end, { desc = 'Goto prev [c]hange' })
--- vim.keymap.set('n', ']c', function()
---   require('gitsigns').next_hunk()
--- end, { desc = 'Goto next [c]hange' })
+-- vim.diagnostic.config {
+--   title = false,
+--   underline = true,
+--   virtual_text = true,
+--   signs = {
+--     text = {
+--       [vim.diagnostic.severity.ERROR] = 'E',
+--       [vim.diagnostic.severity.WARN] = 'W',
+--       [vim.diagnostic.severity.HINT] = 'H',
+--       [vim.diagnostic.severity.INFO] = 'I',
+--     },
+--   },
+--   -- update_in_insert = false,
+--   severity_sort = true,
+--   float = {
+--     source = 'if_many',
+--     style = 'minimal',
+--     border = 'rounded',
+--     -- header = '',
+--     -- prefix = '',
+--   },
+--   inlay_hints = {
+--     enabled = true,
+--     exclude = { 'vue', 'TelescopePrompt' }, -- filetypes for which you don't want to enable inlay hints
+--   },
+-- }
+-- local signs = { Error = ' ', Warning = ' ', Hint = ' ', Information = ' ' }
+-- for type, icon in pairs(signs) do
+--   local hl = 'Diagnostics' .. type
+--   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = '' })
+-- end
 
 -- delete without yanking
 vim.keymap.set({ 'n', 'v' }, '<leader>d', '"_d')
@@ -281,26 +322,26 @@ end, { desc = 'Next [T]ODO comment' })
 vim.keymap.set('n', '[t', function()
   require('todo-comments').jump_prev()
 end, { desc = 'Previous [T]ODO comment' })
--- TODO: go through these ...
---
--- -- undotree
--- vim.keymap.set('n', '<leader>u', '<cmd>UndotreeToggle<cr>')
---
+
+-- undotree
+vim.keymap.set('n', '<leader>u', '<cmd>UndotreeToggle<cr>')
+
 -- -- resize windows
 -- -- TODO fix for MacOS
 -- vim.keymap.set('n', '<C-left>', '<C-w><', opts)
 -- vim.keymap.set('n', '<C-right>', '<C-w>>', opts)
 -- vim.keymap.set('n', '<C-up>', '<C-w>+', opts)
 -- vim.keymap.set('n', '<C-down>', '<C-w>-', opts)
---
+
+-- TODO: go through these ...
 -- -- moving around in vim commandline
--- vim.keymap.set('c', '<c-h>', '<left>')
--- vim.keymap.set('c', '<c-j>', '<down>')
--- vim.keymap.set('c', '<c-k>', '<up>')
--- vim.keymap.set('c', '<c-l>', '<right>')
--- vim.keymap.set('c', '^', '<home>')
--- vim.keymap.set('c', '$', '<end>')
---
+vim.keymap.set('c', '<c-h>', '<left>')
+vim.keymap.set('c', '<c-j>', '<down>')
+vim.keymap.set('c', '<c-k>', '<up>')
+vim.keymap.set('c', '<c-l>', '<right>')
+vim.keymap.set('c', '^', '<home>')
+vim.keymap.set('c', '$', '<end>')
+
 -- -- quickfix list
 vim.keymap.set('n', ']q', ':cnext<cr>')
 vim.keymap.set('n', '[q', ':cprev<cr>')
@@ -337,6 +378,8 @@ end, { desc = '[V]imRC Live [G]rep' })
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
+vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', { desc = 'Goto prev [d]iagnostic' })
+vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', { desc = 'Goto next [d]iagnostic' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -347,15 +390,14 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+-- NOTE: Disable arrow keys in normal mode
+vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
---
 --  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
@@ -621,35 +663,46 @@ require('lazy').setup({
 
       local actions = require 'telescope.actions'
       local sorters = require 'telescope.sorters'
-      require('telescope').setup {
+      local open_with_trouble = require('trouble.sources.telescope').open
+
+      -- Use this to add more results without clearing the trouble list
+      -- local add_to_trouble = require('trouble.sources.telescope').add
+
+      local telescope = require 'telescope'
+
+      telescope.setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
+        -- NOTE: use <C-/> or "?" to see all keymaps
         defaults = {
           mappings = {
             i = {
+              -- TODO: meaning??
               ['<c-enter>'] = 'to_fuzzy_refine',
               ['<C-j>'] = actions.move_selection_next,
               ['<C-k>'] = actions.move_selection_previous,
               ['<C-q>'] = actions.send_to_qflist,
+              ['<C-t>'] = open_with_trouble,
             },
             n = {
               ['<C-c>'] = actions.close,
+              ['<esc>'] = actions.close,
             },
           },
           dynamic_preview_title = true,
           -- history = false,
-          layout_strategy = 'vertical',
-          -- layout_config = {
-          --   scroll_speed = 10,
-          --   horizontal = {
-          --     height = 0.98,
-          --     preview_cutoff = 80,
-          --     preview_width = 0.7,
-          --     prompt_position = 'top',
-          --     width = 0.98,
-          --   },
-          -- },
+          layout_strategy = 'horizontal',
+          layout_config = {
+            scroll_speed = 10,
+            horizontal = {
+              height = 0.95,
+              preview_cutoff = 80,
+              preview_width = 0.7,
+              prompt_position = 'top',
+              width = 0.95,
+            },
+          },
           vimgrep_arguments = {
             'rg',
             -- '--color=never',
@@ -659,9 +712,10 @@ require('lazy').setup({
             '--column',
             '--hidden',
             '--smart-case',
+            '--glob=!.git/',
           },
           prompt_prefix = '> ',
-          selection_caret = '> ',
+          selection_caret = '>> ',
           color_devicons = true,
           path_display = {
             shorten = { len = 2, exclude = { 1, -1 } },
@@ -676,7 +730,19 @@ require('lazy').setup({
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
-            require('telescope.themes').get_dropdown(),
+            require('telescope.themes').get_dropdown {
+              previewer = false,
+              initial_mode = 'normal',
+              sorting_strategy = 'ascending',
+              layout_strategy = 'horizontal',
+              layout_config = {
+                horizontal = {
+                  width = 0.5,
+                  height = 0.4,
+                  preview_width = 0.6,
+                },
+              },
+            },
           },
         },
         fzf = {
@@ -706,7 +772,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
+      vim.keymap.set('n', '<leader>se', builtin.diagnostics, { desc = '[S]earch [E]rrorsand Diagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
@@ -774,6 +840,17 @@ require('lazy').setup({
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
     },
+    opts = {
+      diagnostics = {
+        underline = true,
+        update_in_insert = false,
+        virtual_text = {
+          prefix = '',
+          spacing = 4,
+          source = 'if_many',
+        },
+      },
+    },
     config = function()
       -- Brief aside: **What is LSP?**
       --
@@ -836,15 +913,15 @@ require('lazy').setup({
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
           --  goto type definition
-          map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('<leader>gd', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+          map('<leader>sd', require('telescope.builtin').lsp_document_symbols, 'Search [S]ymbols in [D]ocument ')
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+          map('<leader>sw', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Search [S]ymbols in [W]orkspace')
 
           -- map('gs', vim.lsp.buf.signature_help, '[G]oto [S]ignature')
 
@@ -860,6 +937,19 @@ require('lazy').setup({
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header.
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+
+          -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
+          ---@param client vim.lsp.Client
+          ---@param method vim.lsp.protocol.Method
+          ---@param bufnr? integer some lsp support methods only in specific files
+          ---@return boolean
+          local function client_supports_method(client, method, bufnr)
+            if vim.fn.has 'nvim-0.11' == 1 then
+              return client:supports_method(method, bufnr)
+            else
+              return client.supports_method(method, { bufnr = bufnr })
+            end
+          end
 
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
@@ -894,13 +984,43 @@ require('lazy').setup({
           -- code, if the language server you are using supports them
           --
           -- This may be unwanted, since they displace some of your code
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+          if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
           end
         end,
       })
+
+      -- TODO: fix why diagnostics not working?
+      -- Diagnostic Config
+      -- See :help vim.diagnostic.Opts
+      vim.diagnostic.config {
+        severity_sort = true,
+        float = { border = 'rounded', source = 'if_many' },
+        underline = { severity = vim.diagnostic.severity.ERROR },
+        signs = vim.g.have_nerd_font and {
+          text = {
+            [vim.diagnostic.severity.ERROR] = '󰅚 ',
+            [vim.diagnostic.severity.WARN] = '󰀪 ',
+            [vim.diagnostic.severity.INFO] = '󰋽 ',
+            [vim.diagnostic.severity.HINT] = '󰌶 ',
+          },
+        } or {},
+        virtual_text = {
+          source = 'if_many',
+          spacing = 2,
+          format = function(diagnostic)
+            local diagnostic_message = {
+              [vim.diagnostic.severity.ERROR] = diagnostic.message,
+              [vim.diagnostic.severity.WARN] = diagnostic.message,
+              [vim.diagnostic.severity.INFO] = diagnostic.message,
+              [vim.diagnostic.severity.HINT] = diagnostic.message,
+            }
+            return diagnostic_message[diagnostic.severity]
+          end,
+        },
+      }
 
       -- LSP servers and clients are able to communicate to each other what features they support.
       --  By default, Neovim doesn't support everything that is in the LSP specification.
@@ -938,7 +1058,33 @@ require('lazy').setup({
             },
           },
         },
-        -- pylsp = {},
+        -- pylsp = {
+        --   -- see https://github.com/python-lsp/python-lsp-server#configuration
+        --   configurationSources = { '' },
+        --   plugins = {
+        --     pycodestyle = { enabled = false, ignore = { 'E501', 'E302', 'E303', 'W391', 'F401', 'E402', 'E265' } },
+        --     flake8 = { enabled = false, ignore = { 'E501', 'E302', 'E303', 'W391', 'F401', 'E402', 'E265' } },
+        --     jedi_completion = { enabled = false },
+        --     jedi_definition = { enabled = false },
+        --     jedi_hover = { enabled = false },
+        --     jedi_references = { enabled = false },
+        --     jedi_signature_help = { enabled = false },
+        --     jedi_symbols = { enabled = false, all_scopes = false, include_import_symbols = false },
+        --     preload = { enabled = false, modules = { 'numpy', 'scipy' } },
+        --     mccabe = { enabled = false },
+        --     mypy = { enabled = false },
+        --     isort = { enabled = false },
+        --     spyder = { enabled = false },
+        --     memestra = { enabled = false },
+        --     pyflakes = { enabled = false },
+        --     yapf = { enabled = false },
+        --     pylint = {
+        --       enabled = false,
+        --     },
+        --     rope = { enabled = true },
+        --     rope_completion = { enabled = false, eager = false },
+        --   },
+        -- },
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -997,6 +1143,7 @@ require('lazy').setup({
           'ruff',
         })
       end
+
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       require('mason-lspconfig').setup {
@@ -1097,6 +1244,7 @@ require('lazy').setup({
       --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
+      'hrsh7th/cmp-buffer',
     },
     config = function()
       -- See `:help cmp`
@@ -1160,6 +1308,8 @@ require('lazy').setup({
           ['<C-Space>'] = cmp.mapping.complete {},
           -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
           ['<CR>'] = cmp.mapping.confirm { select = true },
+          ['<C-c>'] = cmp.mapping.abort(),
+          ['<ESC>'] = cmp.mapping.abort(),
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  So if you have a snippet that's like:
@@ -1196,6 +1346,7 @@ require('lazy').setup({
         },
         performance = {
           max_view_entries = 30,
+          debounce = 100,
         },
         formatting = {
           format = lspkind.cmp_format {
@@ -1212,6 +1363,10 @@ require('lazy').setup({
             --   return vim_item
             -- end,
           },
+        },
+        window = {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
         },
       }
     end,
