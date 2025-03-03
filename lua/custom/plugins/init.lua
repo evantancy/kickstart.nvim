@@ -3,6 +3,37 @@
 --
 -- See the kickstart.nvim README for more information
 return {
+  {
+    'olimorris/codecompanion.nvim',
+    dependencies = {
+      { 'nvim-lua/plenary.nvim' },
+      { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' },
+      { 'hrsh7th/nvim-cmp' },
+    },
+    config = function()
+      require('codecompanion').setup {
+        adapters = {
+          opts = {
+            show_defaults = true,
+          },
+          openrouter_claude = function()
+            return require('codecompanion.adapters').extend('openai_compatible', {
+              env = {
+                url = 'https://openrouter.ai/api',
+                api_key = 'cmd: EDITOR=cat sops -d ~/.openrouter-api-key.enc 2>/dev/null',
+                chat_url = '/v1/chat/completions',
+              },
+              schema = {
+                model = {
+                  default = 'anthropic/claude-3.7-sonnet',
+                },
+              },
+            })
+          end,
+        },
+      }
+    end,
+  },
   { -- Visualize undo trees
     'mbbill/undotree',
   },
@@ -50,11 +81,11 @@ return {
         },
         suggestion = {
           enabled = true,
-          auto_trigger = true,
+          auto_trigger = false,
           hide_during_completion = true,
-          debounce = 75,
+          debounce = 200,
           keymap = {
-            accept = '<tab>',
+            -- accept = '<tab>',
             accept_word = false,
             accept_line = false,
             next = '<C-n>',
@@ -77,6 +108,10 @@ return {
         copilot_node_command = 'node', -- Node.js version must be > 18.x
         server_opts_overrides = {},
       }
+
+      vim.keymap.set('n', '<leader>tc', function()
+        require('copilot.suggestion').toggle_auto_trigger()
+      end, { desc = '[T]oggle [C]opilot' })
     end,
   },
   { 'akinsho/bufferline.nvim', version = '*', dependencies = 'nvim-tree/nvim-web-devicons', opts = {} },

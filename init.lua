@@ -643,7 +643,7 @@ require('lazy').setup({
               height = 0.95,
               preview_cutoff = 80,
               preview_width = 0.7,
-              prompt_position = 'top',
+              prompt_position = 'bottom',
               width = 0.95,
             },
           },
@@ -671,7 +671,11 @@ require('lazy').setup({
           grep_previewer = require('telescope.previewers').vim_buffer_vimgrep.new,
           qflist_previewer = require('telescope.previewers').vim_buffer_qflist.new,
         },
-        -- pickers = {}
+        pickers = {
+          -- find_files = {
+          --   theme = 'ivy',
+          -- },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown {
@@ -744,6 +748,8 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
+      -- NOTE: telescope specific plugins
+      require('kickstart.plugins.telescope-multigrep').setup()
     end,
   },
   -- LSP Plugins
@@ -1272,6 +1278,7 @@ require('lazy').setup({
           { name = 'buffer' },
           { name = 'path' },
           { name = 'nvim_lsp_signature_help' },
+          { name = 'codecompanion' },
         },
         performance = {
           max_view_entries = 30,
@@ -1357,6 +1364,7 @@ require('lazy').setup({
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     config = function()
       -- Better Around/Inside textobjects
       --
@@ -1365,6 +1373,7 @@ require('lazy').setup({
       --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
       --  - ci'  - [C]hange [I]nside [']quote
       require('mini.ai').setup { n_lines = 500 }
+      require('mini.files').setup()
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
       --
@@ -1463,7 +1472,6 @@ require('lazy').setup({
   --
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
-  --
   require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
@@ -1500,6 +1508,10 @@ require('lazy').setup({
       task = '📌',
       lazy = '💤 ',
     },
+  },
+  change_detection = {
+    enabled = true,
+    notify = false,
   },
 })
 
