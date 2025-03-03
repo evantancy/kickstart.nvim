@@ -217,22 +217,6 @@ vim.cmd [[
 vim.keymap.set('n', '<leader>td', function()
   vim.diagnostic.enable(not vim.diagnostic.is_enabled())
 end, { silent = true, noremap = true, desc = '[T]oggle [D]iagnostics' })
--- -- show inline errors
--- vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
---   -- Enable underline, use default values
---   underline = true,
---   -- Enable virtual text, override spacing to 4
---   virtual_text = {
---     spacing = 4,
---   },
---   -- Use a function to dynamically turn signs off
---   -- and on, using buffer local variables
---   signs = function(namespace, bufnr)
---     return vim.b[bufnr].show_signs == true
---   end,
---   -- Disable a feature
---   update_in_insert = false,
--- })
 
 -- make Ctrl-C escape
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-c>', '<Esc>', { noremap = true })
@@ -762,14 +746,6 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
-  {
-    'lukas-reineke/indent-blankline.nvim',
-    main = 'ibl',
-    ---@module "ibl"
-    ---@type ibl.config
-    opts = {},
-  },
-
   -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -861,7 +837,7 @@ require('lazy').setup({
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
           --  goto type definition
-          map('<leader>gd', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('gt', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
@@ -1331,18 +1307,27 @@ require('lazy').setup({
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
+    dependencies = {
+      'ellisonleao/gruvbox.nvim',
+    },
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
       ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
+      require('gruvbox').setup {
+        italic = {
+          comments = false,
+          emph = false,
+          keywords = false,
+          functions = false,
+          strings = false,
+          variables = false,
         },
       }
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.o.background = 'dark'
+      vim.cmd.colorscheme 'gruvbox'
     end,
   },
 
@@ -1387,7 +1372,7 @@ require('lazy').setup({
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
       -- NOTE: remove this in favour of nvim-surround
-      -- require('mini.surround').setup()
+      require('mini.surround').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
@@ -1454,10 +1439,11 @@ require('lazy').setup({
       incremental_selection = {
         enable = true,
         keymaps = {
-          init_selection = '<c-space>',
-          node_incremental = '<c-space>',
-          scope_incremental = '<c-s>',
-          node_decremental = '<c-backspace>',
+          -- NOTE: enter into visual mode with v and follow by pressing v/V to use treesitter incremental selection, or/and just w/W/b/%/f/j/l etc.
+          -- Most base movements/selections should work.
+          -- Edit: Also remember that in the visual mode you could go to the "left side of the selection" with o. :h visual-change
+          node_incremental = 'v',
+          node_decremental = 'V',
         },
       },
     },
