@@ -1399,7 +1399,7 @@ require('lazy').setup({
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      -- NOTE: remove this in favour of nvim-surround
+      -- NOTE: this is quite different to nvim-surround
       require('mini.surround').setup()
 
       -- Simple and easy statusline.
@@ -1424,15 +1424,6 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter-context',
-      config = function()
-        local treesitter_context = require 'treesitter-context'
-        treesitter_context.setup {
-          multiwindow = true, -- Enable multiwindow support.
-        }
-      end,
-    },
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
