@@ -1203,15 +1203,6 @@ require('lazy').setup({
       luasnip.config.setup {}
 
       local lspkind = require 'lspkind'
-      local source_mapping = {
-        buffer = '[Buf]',
-        nvim_lsp = '[LSP]',
-        copilot = '[Copilot]',
-        nvim_lua = '[Lua]',
-        cmp_tabnine = '[TN]',
-        path = '[Path]',
-        luasnip = '[snip]',
-      }
 
       cmp.setup {
         snippet = {
@@ -1304,6 +1295,8 @@ require('lazy').setup({
           format = lspkind.cmp_format {
             -- maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
             -- can also be a function to dynamically calculate max width such as
+            -- mode = 'symbol',
+            -- show_labelDetails = true, -- show labelDetails in menu. Disabled by default
             maxwidth = function()
               return math.floor(0.45 * vim.o.columns)
             end,
@@ -1314,6 +1307,23 @@ require('lazy').setup({
             -- before = function(entry, vim_item)
             --   return vim_item
             -- end,
+            -- The function below will be called before any actual modifications from lspkind
+            -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+            before = function(entry, item)
+              -- NOTE: unused atm
+              local source_mapping = {
+                buffer = '[Buf]',
+                nvim_lsp = '[LSP]',
+                copilot = '[Copilot]',
+                nvim_lua = '[Lua]',
+                cmp_tabnine = '[TN]',
+                path = '[Path]',
+                luasnip = '[snip]',
+              }
+
+              item.menu = source_mapping[entry.source.name]
+              return item
+            end,
           },
         },
         window = {
