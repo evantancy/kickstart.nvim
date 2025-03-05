@@ -4,6 +4,20 @@
 -- See the kickstart.nvim README for more information
 return {
   {
+    'Bekaboo/dropbar.nvim',
+    -- optional, but required for fuzzy finder support
+    dependencies = {
+      'nvim-telescope/telescope-fzf-native.nvim',
+      build = 'make',
+    },
+    config = function()
+      local dropbar_api = require 'dropbar.api'
+      vim.keymap.set('n', '<Leader>;', dropbar_api.pick, { desc = 'Pick symbols in winbar' })
+      vim.keymap.set('n', '[;', dropbar_api.goto_context_start, { desc = 'Go to start of current context' })
+      vim.keymap.set('n', '];', dropbar_api.select_next_context, { desc = 'Select next context' })
+    end,
+  },
+  {
     'olimorris/codecompanion.nvim',
     dependencies = {
       { 'nvim-lua/plenary.nvim' },
@@ -48,7 +62,6 @@ return {
       'tpope/vim-repeat',
     },
     config = function()
-      local leap = require 'leap'
       vim.keymap.set({ 'n', 'x' }, 'gs', '<Plug>(leap)')
       vim.keymap.set('o', 'gs', '<Plug>(leap-forward)')
       -- vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
@@ -191,15 +204,18 @@ return {
           :find()
       end
 
-      vim.keymap.set('n', '<C-e>', function()
-        toggle_telescope(harpoon:list())
-      end, { desc = 'Open harpoon window' })
+      -- vim.keymap.set('n', '<C-e>', function()
+      --   toggle_telescope(harpoon:list())
+      -- end, { desc = 'Open harpoon window' })
       vim.keymap.set('n', '<leader>a', function()
         harpoon:list():add()
-      end, { desc = 'harpoon [a]dd' })
-      -- vim.keymap.set('n', '<leader>hl', function()
-      --   harpoon.ui:toggle_quick_menu(harpoon:list())
-      -- end, { desc = '[h]arpoon [l]ist' })
+      end, { desc = 'harpoon [a]ppend' })
+      -- vim.keymap.set('n', '<leader>A', function()
+      --   harpoon:list():prepend()
+      -- end, { desc = 'harpoon prepend' })
+      vim.keymap.set('n', '<C-e>', function()
+        harpoon.ui:toggle_quick_menu(harpoon:list())
+      end, { desc = '[h]arpoon [l]ist' })
       vim.keymap.set('n', '<A-1>', function()
         harpoon:list():select(1)
       end)
