@@ -17,13 +17,6 @@ return {
       vim.keymap.set('n', '];', dropbar_api.select_next_context, { desc = 'Select next context' })
     end,
   },
-  -- useful when there are embedded languages in certain types of files (e.g. Vue or React)
-  { 'joosepalviste/nvim-ts-context-commentstring', lazy = true },
-  {
-    'numToStr/Comment.nvim',
-    opts = {},
-    lazy = false,
-  },
   {
     'olimorris/codecompanion.nvim',
     dependencies = {
