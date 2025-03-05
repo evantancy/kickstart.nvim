@@ -176,7 +176,8 @@ vim.opt.splitbelow = true
 --  See `:help 'list'`
 --  and `:help 'listchars'`
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣', space = '·', eol = '↴' }
+-- NOTE: uncomment to be able to see these chars
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣', space = '·', eol = '↴' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -622,16 +623,22 @@ require('lazy').setup({
         defaults = {
           mappings = {
             i = {
-              -- TODO: meaning??
-              ['<c-enter>'] = 'to_fuzzy_refine',
+              ['<C-f>'] = actions.to_fuzzy_refine, -- convert non-fuzzy to fuzzy
               ['<C-j>'] = actions.move_selection_next,
               ['<C-k>'] = actions.move_selection_previous,
               ['<C-q>'] = actions.send_to_qflist,
               ['<C-t>'] = open_with_trouble,
+              ['<C-d>'] = actions.delete_buffer,
             },
             n = {
               ['<C-c>'] = actions.close,
               ['<esc>'] = actions.close,
+              ['<C-f>'] = actions.to_fuzzy_refine, -- convert non-fuzzy to fuzzy
+              ['<C-j>'] = actions.move_selection_next,
+              ['<C-k>'] = actions.move_selection_previous,
+              ['<C-q>'] = actions.send_to_qflist,
+              ['<C-t>'] = open_with_trouble,
+              ['<C-d>'] = actions.delete_buffer,
             },
           },
           dynamic_preview_title = true,
@@ -717,14 +724,22 @@ require('lazy').setup({
           find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' },
         }
       end, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader><C-e>', builtin.command_history, { desc = 'Open command history in Telescope' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-      vim.keymap.set('n', '<leader>se', builtin.diagnostics, { desc = '[S]earch [E]rrors and Diagnostics' })
+
+      -- NOTE: disabled in favor of custom buffer delete funcs
+      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[S]each open [B]uffers' })
+      -- NOTE: disabled in favor of multigrep
+      -- vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>se', function()
+        builtin.diagnostics {
+          layout_strategy = 'vertical',
+        }
+      end, { desc = '[S]earch [E]rrors and Diagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[S]each open [B]uffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -748,7 +763,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
-      -- NOTE: telescope specific plugins
+      -- NOTE: telescope specific custom plugins
       require('kickstart.plugins.telescope-multigrep').setup()
     end,
   },
@@ -1099,14 +1114,14 @@ require('lazy').setup({
     event = { 'BufWritePre' },
     cmd = { 'ConformInfo' },
     keys = {
-      {
-        '<leader>f',
-        function()
-          require('conform').format { async = true, lsp_format = 'fallback' }
-        end,
-        mode = '',
-        desc = '[F]ormat buffer',
-      },
+      -- {
+      --   '<leader>f',
+      --   function()
+      --     require('conform').format { async = true, lsp_format = 'fallback' }
+      --   end,
+      --   mode = '',
+      --   desc = '[F]ormat buffer',
+      -- },
     },
     opts = {
       notify_on_error = false,
@@ -1126,6 +1141,7 @@ require('lazy').setup({
           lsp_format = lsp_format_opt,
         }
       end,
+      -- NOTE: configure specific formatters here
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
@@ -1212,18 +1228,18 @@ require('lazy').setup({
         -- No, but seriously. Please read `:help ins-completion`, it is really good!
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
-          ['<C-n>'] = cmp.mapping.select_next_item(),
+          -- ['<C-n>'] = cmp.mapping.select_next_item(),
           ['<C-j>'] = cmp.mapping.select_next_item(),
           -- Select the [p]revious item
-          ['<C-p>'] = cmp.mapping.select_prev_item(),
+          -- ['<C-p>'] = cmp.mapping.select_prev_item(),
           ['<C-k>'] = cmp.mapping.select_prev_item(),
           -- Select the [p]revious item
 
           -- Scroll the documentation window [b]ack / [f]orward
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-u>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-d>'] = cmp.mapping.scroll_docs(4),
+          -- ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+          -- ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          -- ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+          -- ['<C-d>'] = cmp.mapping.scroll_docs(4),
 
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
@@ -1239,7 +1255,7 @@ require('lazy').setup({
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
-          ['<C-Space>'] = cmp.mapping.complete {},
+          -- ['<C-Space>'] = cmp.mapping.complete {},
           -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
           ['<CR>'] = cmp.mapping.confirm { select = true },
           ['<C-c>'] = cmp.mapping.abort(),
@@ -1314,27 +1330,30 @@ require('lazy').setup({
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
-    dependencies = {
-      'ellisonleao/gruvbox.nvim',
-    },
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
       ---@diagnostic disable-next-line: missing-fields
-      require('gruvbox').setup {
-        italic = {
-          comments = false,
-          emph = false,
-          keywords = false,
-          functions = false,
-          strings = false,
-          variables = false,
+      require('tokyonight').setup {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- style = 'night', -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
+        transparent = false, -- Enable this to disable setting the background color
+        terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
+        styles = {
+          -- Style to be applied to different syntax groups
+          -- Value is any valid attr-list value for `:help nvim_set_hl`
+          comments = { italic = false },
+          keywords = { italic = false },
+          -- Background styles. Can be "dark", "transparent" or "normal"
+          sidebars = 'dark', -- style for sidebars, see below
+          floats = 'dark', -- style for floating windows
         },
       }
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.o.background = 'dark'
-      vim.cmd.colorscheme 'gruvbox'
+      vim.cmd.colorscheme 'tokyonight-night'
     end,
   },
 
