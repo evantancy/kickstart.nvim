@@ -127,12 +127,13 @@ vim.schedule(function()
 end)
 
 -- Tabs and Indentation
-vim.opt.smarttab = true
-vim.opt.autoindent = true
-vim.opt.smartcase = true
-vim.opt.smartindent = true
-vim.opt.breakindent = true
-vim.opt.expandtab = true -- Tabs to spacesbreakindent
+vim.opt.smarttab = true -- Makes tabbing smarter, will use shiftwidths instead of tabstop in some cases
+vim.opt.autoindent = true -- Copy indent from current line when starting a new line
+vim.opt.smartcase = true -- Override the 'ignorecase' option if the search pattern contains upper case characters
+vim.opt.smartindent = true -- Makes indenting smart
+vim.opt.breakindent = true -- Wrapped lines will continue visually indented (same amount of space as the beginning of that line)
+vim.opt.expandtab = true -- Convert tabs to spaces
+
 vim.opt.tabstop = 4 -- Number of spaces for tab
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4 -- Number of spaces for indentation
@@ -145,22 +146,13 @@ vim.cmd [[
   ]]
 vim.opt.syntax = 'enable' -- Enable syntax highlighting
 
--- Tabs and Indentation
-vim.opt.smarttab = true
-vim.opt.autoindent = true
-vim.opt.smartindent = true
-vim.opt.expandtab = true -- Tabs to spaces
-vim.opt.tabstop = 4 -- Number of spaces for tab
-vim.opt.softtabstop = 4
-vim.opt.shiftwidth = 4 -- Number of spaces for indentation
--- vim.opt.virtualedit = 'block' -- Allow rectangular selections, see https://medium.com/usevim/vim-101-virtual-editing-661c99c05847
-
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
 -- Keep signcolumn on by default
 vim.opt.signcolumn = 'yes'
+vim.cmd [[set signcolumn=auto:4]]
 
 -- Decrease update time
 vim.opt.updatetime = 300
@@ -941,6 +933,7 @@ require('lazy').setup({
       -- See :help vim.diagnostic.Opts
       vim.diagnostic.config {
         severity_sort = true,
+        update_in_insert = false,
         float = { border = 'rounded', source = 'if_many' },
         underline = { severity = vim.diagnostic.severity.ERROR },
         signs = vim.g.have_nerd_font and {
@@ -998,6 +991,7 @@ require('lazy').setup({
                 diagnosticMode = 'workspace',
                 useLibraryCodeForTypes = true,
                 typeCheckingMode = 'basic',
+                autoImportCompletions = true,
               },
             },
           },
@@ -1070,6 +1064,7 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
         'prismals',
+        'shellcheck',
       })
 
       -- Function to check if "ruff" command is available
@@ -1226,12 +1221,6 @@ require('lazy').setup({
           ['<C-k>'] = cmp.mapping.select_prev_item(),
           -- Select the [p]revious item
 
-          -- Scroll the documentation window [b]ack / [f]orward
-          -- ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          -- ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          -- ['<C-u>'] = cmp.mapping.scroll_docs(-4),
-          -- ['<C-d>'] = cmp.mapping.scroll_docs(4),
-
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
           --  This will expand snippets if the LSP sent a snippet.
@@ -1249,7 +1238,6 @@ require('lazy').setup({
           -- ['<C-Space>'] = cmp.mapping.complete {},
           -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
           ['<CR>'] = cmp.mapping.confirm { select = true },
-          ['<C-c>'] = cmp.mapping.abort(),
           ['<ESC>'] = cmp.mapping.abort(),
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
@@ -1281,16 +1269,19 @@ require('lazy').setup({
             group_index = 0,
           },
           { name = 'nvim_lsp' },
+          { name = 'nvim_lsp_signature_help' },
+          { name = 'codecompanion' },
           { name = 'luasnip' },
           { name = 'buffer' },
           { name = 'path' },
-          { name = 'nvim_lsp_signature_help' },
-          { name = 'codecompanion' },
+          { name = 'copilot', group_index = 2 },
         },
+        ---@diagnostic disable-next-line: missing-fields
         performance = {
           max_view_entries = 30,
           debounce = 100,
         },
+        ---@diagnostic disable-next-line: missing-fields
         formatting = {
           format = lspkind.cmp_format {
             -- maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
@@ -1310,7 +1301,6 @@ require('lazy').setup({
             -- The function below will be called before any actual modifications from lspkind
             -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
             before = function(entry, item)
-              -- NOTE: unused atm
               local source_mapping = {
                 buffer = '[Buf]',
                 nvim_lsp = '[LSP]',
@@ -1462,7 +1452,6 @@ require('lazy').setup({
     config = function()
       require('nvim-treesitter.configs').setup {
         ensure_installed = {
-          'bash',
           'c',
           'diff',
           'html',
@@ -1478,6 +1467,10 @@ require('lazy').setup({
           'gomod',
           'gosum',
           'prisma',
+
+          'json',
+          'regex',
+          'yaml',
         },
         -- Autoinstall languages that are not installed
         auto_install = true,
