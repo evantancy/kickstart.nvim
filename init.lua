@@ -204,6 +204,9 @@ vim.cmd [[
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+vim.keymap.set({ 'n', 'x' }, '<leader>rr', function()
+  require('telescope').extensions.refactoring.refactors()
+end, { desc = 'Toggle [R]efactoring menu' })
 
 -- toggle diagnostics for current buffer
 vim.keymap.set('n', '<leader>td', function()
@@ -977,7 +980,7 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        pyright = {
+        basedpyright = {
           -- use Ruff's import organizer
           disableOrganizeImports = true,
           filetypes = { 'python' },

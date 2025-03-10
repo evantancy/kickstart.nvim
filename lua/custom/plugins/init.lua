@@ -4,6 +4,17 @@
 -- See the kickstart.nvim README for more information
 return {
   {
+    'ThePrimeagen/refactoring.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    lazy = false,
+    config = function()
+      require('refactoring').setup()
+    end,
+  },
+  {
     'vyfor/cord.nvim',
     enabled = false,
     config = function()
