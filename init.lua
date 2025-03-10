@@ -130,8 +130,7 @@ end)
 vim.opt.smarttab = true -- Makes tabbing smarter, will use shiftwidths instead of tabstop in some cases
 vim.opt.autoindent = true -- Copy indent from current line when starting a new line
 vim.opt.smartcase = true -- Override the 'ignorecase' option if the search pattern contains upper case characters
-vim.opt.smartindent = true -- Makes indenting smart
-vim.opt.breakindent = true -- Wrapped lines will continue visually indented (same amount of space as the beginning of that line)
+-- vim.opt.breakindent = true -- Wrapped lines will continue visually indented (same amount of space as the beginning of that line)
 vim.opt.expandtab = true -- Convert tabs to spaces
 
 vim.opt.tabstop = 4 -- Number of spaces for tab
@@ -1144,6 +1143,7 @@ require('lazy').setup({
           'ruff_fix',
           'ruff_format',
         },
+        prisma = { 'prismals' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -1239,7 +1239,7 @@ require('lazy').setup({
           --  completions whenever it has completion options available.
           -- ['<C-Space>'] = cmp.mapping.complete {},
           -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-          ['<CR>'] = cmp.mapping.confirm { select = true },
+          -- ['<CR>'] = cmp.mapping.confirm { select = true },
           ['<ESC>'] = cmp.mapping.abort(),
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
@@ -1507,7 +1507,8 @@ require('lazy').setup({
           --  the list of additional_vim_regex_highlighting and disabled languages for indent.
           additional_vim_regex_highlighting = { 'ruby' },
         },
-        indent = { enable = true, disable = { 'ruby' } },
+        -- NOTE: disabled here because of some weird stuff happening with python
+        indent = { enable = true, disable = { 'ruby', 'python' } },
         incremental_selection = {
           enable = true,
           keymaps = {

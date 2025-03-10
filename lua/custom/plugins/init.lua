@@ -152,6 +152,7 @@ return {
           prev = '[x',
           next = ']x',
         },
+        disable_diagnostics = false, -- This will disable the diagnostics in a buffer whilst it is conflicted
       }
     end,
   },
@@ -255,7 +256,7 @@ return {
           enabled = true,
           auto_trigger = false,
           hide_during_completion = false,
-          debounce = 100,
+          debounce = 25,
           keymap = {
             accept = false,
             accept_word = false,
@@ -398,7 +399,11 @@ return {
   },
   {
     'RRethy/vim-illuminate',
+    enabled = false,
     config = function()
+      vim.cmd [[ hi def IlluminatedWordText gui=underline cterm=underline ]]
+      vim.cmd [[ hi def IlluminatedWordRead gui=underline cterm=underline ]]
+      vim.cmd [[ hi def IlluminatedWordWrite gui=underline cterm=underline ]]
       -- default configuration
       require('illuminate').configure {
         -- providers: provider used to get references in the buffer, ordered by priority
@@ -418,6 +423,7 @@ return {
           'dirbuf',
           'dirvish',
           'fugitive',
+          'TelescopePrompt',
         },
         -- filetypes_allowlist: filetypes to illuminate, this is overridden by filetypes_denylist
         -- You must set filetypes_denylist = {} to override the defaults to allow filetypes_allowlist to take effect
