@@ -128,6 +128,7 @@ end)
 
 -- Tabs and Indentation
 vim.opt.smarttab = true -- Makes tabbing smarter, will use shiftwidths instead of tabstop in some cases
+vim.opt.smartindent = true
 vim.opt.autoindent = true -- Copy indent from current line when starting a new line
 vim.opt.smartcase = true -- Override the 'ignorecase' option if the search pattern contains upper case characters
 -- vim.opt.breakindent = true -- Wrapped lines will continue visually indented (same amount of space as the beginning of that line)
@@ -979,8 +980,8 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        -- gopls = {},
-        basedpyright = {
+        gopls = {},
+        pyright = {
           -- use Ruff's import organizer
           disableOrganizeImports = true,
           filetypes = { 'python' },
