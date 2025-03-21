@@ -4,6 +4,59 @@
 -- See the kickstart.nvim README for more information
 return {
   {
+    'ruifm/gitlinker.nvim',
+    config = function()
+      require('gitlinker').setup {
+        opts = {
+          remote = nil, -- force the use of a specific remote
+          -- adds current line nr in the url for normal mode
+          add_current_line_on_normal_mode = true,
+          -- callback for what to do with the url
+          action_callback = require('gitlinker.actions').copy_to_clipboard,
+          -- print the url after performing the action
+          print_url = true,
+        },
+        callbacks = {
+          ['github.com'] = require('gitlinker.hosts').get_github_type_url,
+          ['gitlab.com'] = require('gitlinker.hosts').get_gitlab_type_url,
+          ['try.gitea.io'] = require('gitlinker.hosts').get_gitea_type_url,
+          ['codeberg.org'] = require('gitlinker.hosts').get_gitea_type_url,
+          ['bitbucket.org'] = require('gitlinker.hosts').get_bitbucket_type_url,
+          ['try.gogs.io'] = require('gitlinker.hosts').get_gogs_type_url,
+          ['git.sr.ht'] = require('gitlinker.hosts').get_srht_type_url,
+          ['git.launchpad.net'] = require('gitlinker.hosts').get_launchpad_type_url,
+          ['repo.or.cz'] = require('gitlinker.hosts').get_repoorcz_type_url,
+          ['git.kernel.org'] = require('gitlinker.hosts').get_cgit_type_url,
+          ['git.savannah.gnu.org'] = require('gitlinker.hosts').get_cgit_type_url,
+        },
+        -- default mapping to call url generation with action_callback
+        mappings = '<leader>gh',
+      }
+    end,
+  },
+  {
+    'luukvbaal/statuscol.nvim',
+    config = function()
+      -- local builtin = require("statuscol.builtin")
+      require('statuscol').setup {
+        -- configuration goes here, for example:
+        -- relculright = true,
+        -- segments = {
+        --   { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
+        --   {
+        --     sign = { namespace = { "diagnostic/signs" }, maxwidth = 2, auto = true },
+        --     click = "v:lua.ScSa"
+        --   },
+        --   { text = { builtin.lnumfunc }, click = "v:lua.ScLa", },
+        --   {
+        --     sign = { name = { ".*" }, maxwidth = 2, colwidth = 1, auto = true, wrap = true },
+        --     click = "v:lua.ScSa"
+        --   },
+        -- }
+      }
+    end,
+  },
+  {
     'ThePrimeagen/refactoring.nvim',
     dependencies = {
       'nvim-lua/plenary.nvim',
@@ -182,7 +235,71 @@ return {
     end,
   },
   {
+    'yetone/avante.nvim',
+    enabled = false,
+    event = 'VeryLazy',
+    version = false, -- Never set this value to "*"! Never!
+    opts = {
+      -- add any opts here
+      -- for example
+      provider = 'openai',
+      openai = {
+        endpoint = 'https://openrouter.ai/api',
+        model = 'anthropic/claude-3.7-sonnet', -- your desired model (or use gpt-4o, etc.)
+        timeout = 30000, -- Timeout in milliseconds, increase this for reasoning models
+        temperature = 0,
+        max_completion_tokens = 8192, -- Increase this to include reasoning tokens (for reasoning models)
+        --reasoning_effort = "medium", -- low|medium|high, only used for reasoning models
+      },
+    },
+    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
+    build = 'make',
+    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
+    config = function()
+      vim.env.OPENAI_API_KEY = 'cmd: EDITOR=cat sops -d ~/.openrouter-api-key.enc 2>/dev/null'
+    end,
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'stevearc/dressing.nvim',
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+      --- The below dependencies are optional,
+      'echasnovski/mini.pick', -- for file_selector provider mini.pick
+      'nvim-telescope/telescope.nvim', -- for file_selector provider telescope
+      'hrsh7th/nvim-cmp', -- autocompletion for avante commands and mentions
+      'ibhagwan/fzf-lua', -- for file_selector provider fzf
+      'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
+      'zbirenbaum/copilot.lua', -- for providers='copilot'
+      {
+        -- support for image pasting
+        'HakonHarnes/img-clip.nvim',
+        event = 'VeryLazy',
+        opts = {
+          -- recommended settings
+          default = {
+            embed_image_as_base64 = false,
+            prompt_for_file_name = false,
+            drag_and_drop = {
+              insert_mode = true,
+            },
+            -- required for Windows users
+            use_absolute_path = true,
+          },
+        },
+      },
+      {
+        -- Make sure to set this up properly if you have lazy=true
+        'MeanderingProgrammer/render-markdown.nvim',
+        opts = {
+          file_types = { 'markdown', 'Avante' },
+        },
+        ft = { 'markdown', 'Avante' },
+      },
+    },
+  },
+  {
     'olimorris/codecompanion.nvim',
+    enabled = true,
     dependencies = {
       { 'nvim-lua/plenary.nvim' },
       { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' },
@@ -435,6 +552,8 @@ return {
           'dirvish',
           'fugitive',
           'TelescopePrompt',
+          'Avante',
+          'codecompanion',
         },
         -- filetypes_allowlist: filetypes to illuminate, this is overridden by filetypes_denylist
         -- You must set filetypes_denylist = {} to override the defaults to allow filetypes_allowlist to take effect
