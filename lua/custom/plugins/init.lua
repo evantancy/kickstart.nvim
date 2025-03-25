@@ -4,6 +4,73 @@
 -- See the kickstart.nvim README for more information
 return {
   {
+    -- Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python' }
+    -- NOTE: this is the only plugin that works well for python
+    -- tried vim-doge and neogen as well
+    'heavenshell/vim-pydocstring',
+    build = 'make install',
+    config = function()
+      vim.g.pydocstring_formatter = 'google' -- 'google', 'numpy', 'sphinx'
+    end,
+  },
+  {
+    'stevearc/oil.nvim',
+    -- Optional dependencies
+    -- dependencies = { { 'echasnovski/mini.icons', opts = {} } },
+    dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if you prefer nvim-web-devicons
+    -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
+    lazy = false,
+    config = function()
+      -- Oil keymaps
+      vim.keymap.set('n', '-', '<CMD>Oil --float<CR>', { desc = 'Open parent directory' })
+
+      require('oil').setup {
+
+        lsp_file_methods = {
+          -- Enable or disable LSP file operations
+          enabled = true,
+          -- Time to wait for LSP file operations to complete before skipping
+          timeout_ms = 10000,
+          -- Set to true to autosave buffers that are updated with LSP willRenameFiles
+          -- Set to "unmodified" to only save unmodified buffers
+          autosave_changes = true,
+        },
+        skip_confirm_for_simple_edits = true,
+        -- Set to true to watch the filesystem for changes and reload oil
+        watch_for_changes = false,
+
+        -- Keymaps in oil buffer. Can be any value that `vim.keymap.set` accepts OR a table of keymap
+        -- options with a `callback` (e.g. { callback = function() ... end, desc = "", mode = "n" })
+        -- Additionally, if it is a string that matches "actions.<name>",
+        -- it will use the mapping at require("oil.actions").<name>
+        -- Set to `false` to remove a keymap
+        -- See :help oil-actions for a list of all available actions
+        keymaps = {
+          -- NOTE: these are the defaults
+          ['g?'] = { 'actions.show_help', mode = 'n' },
+          ['<CR>'] = 'actions.select',
+          ['<C-s>'] = { 'actions.select', opts = { vertical = true } },
+          ['<C-h>'] = { 'actions.select', opts = { horizontal = true } },
+          ['<C-t>'] = { 'actions.select', opts = { tab = true } },
+          ['<C-p>'] = 'actions.preview',
+          ['<C-c>'] = { 'actions.close', mode = 'n' },
+          ['<C-l>'] = 'actions.refresh',
+          ['-'] = { 'actions.parent', mode = 'n' },
+          ['_'] = { 'actions.open_cwd', mode = 'n' },
+          ['`'] = { 'actions.cd', mode = 'n' },
+          ['~'] = { 'actions.cd', opts = { scope = 'tab' }, mode = 'n' },
+          ['gs'] = { 'actions.change_sort', mode = 'n' },
+          ['gx'] = 'actions.open_external',
+          ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
+          ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
+
+          -- NOTE: user defined keybinds
+          ['<C-y>'] = 'actions.select',
+        },
+      }
+    end,
+  },
+  {
     'ruifm/gitlinker.nvim',
     config = function()
       require('gitlinker').setup {

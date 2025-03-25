@@ -288,7 +288,24 @@ vim.keymap.set('c', '$', '<end>')
 -- -- quickfix list
 vim.keymap.set('n', ']q', ':cnext<cr>')
 vim.keymap.set('n', '[q', ':cprev<cr>')
---
+
+--- HACK: Override `vim.lsp.util.stylize_markdown` to use Treesitter.
+---@param bufnr integer
+---@param contents string[]
+---@param opts table
+---@return string[]
+---@diagnostic disable-next-line: duplicate-set-field
+vim.lsp.util.stylize_markdown = function(bufnr, contents, opts)
+  contents = vim.lsp.util._normalize_markdown(contents, {
+    width = vim.lsp.util._make_floating_popup_size(contents, opts),
+  })
+  vim.bo[bufnr].filetype = 'markdown'
+  vim.treesitter.start(bufnr)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, contents)
+
+  return contents
+end
+
 -- -- increment/decrement
 -- vim.keymap.set('n', '+', '<c-a>')
 -- vim.keymap.set('n', '_', '<c-x>')
@@ -706,6 +723,12 @@ require('lazy').setup({
           qflist_previewer = require('telescope.previewers').vim_buffer_qflist.new,
         },
         pickers = {
+          live_grep = {
+            on_input_filter_cb = function(prompt)
+              -- AND operator for live_grep like how fzf handles spaces with wildcards in rg
+              return { prompt = prompt:gsub('%s', '.*') }
+            end,
+          },
           -- find_files = {
           --   theme = 'ivy',
           -- },
@@ -867,11 +890,6 @@ require('lazy').setup({
             vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
-          -- Jump to the definition of the word under your cursor.
-          --  This is where a variable was first declared, or where a function is defined, etc.
-          --  To jump back, press <C-t>.
-          map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-
           -- Find references for the word under your cursor.
           -- goto references
           map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -908,7 +926,7 @@ require('lazy').setup({
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header.
-          map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+          map('<leader>gd', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
           -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
           ---@param client vim.lsp.Client
@@ -960,6 +978,20 @@ require('lazy').setup({
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
+          end
+
+          if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_definition, event.buf) then
+            -- Jump to the definition of the word under your cursor.
+            --  This is where a variable was first declared, or where a function is defined, etc.
+            --  To jump back, press <C-t>.
+            -- NOTE: trying out fzflua
+            -- map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+            map('gd', function()
+              require('fzf-lua').lsp_definitions { jump1 = false }
+            end, 'Peek definition')
+            map('gD', function()
+              require('fzf-lua').lsp_definitions { jump1 = true }
+            end, 'Go to definition')
           end
         end,
       })
@@ -1539,7 +1571,6 @@ require('lazy').setup({
     'echasnovski/mini.nvim',
     dependencies = {
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
-
       {
         -- useful when there are embedded languages in certain types of files (e.g. Vue or React)
         'joosepalviste/nvim-ts-context-commentstring',
@@ -1559,7 +1590,7 @@ require('lazy').setup({
       --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
       --  - ci'  - [C]hange [I]nside [']quote
       require('mini.ai').setup { n_lines = 500 }
-      require('mini.files').setup()
+      -- require('mini.files').setup()
       require('mini.comment').setup {
         options = {
           custom_commentstring = function()
