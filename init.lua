@@ -99,6 +99,9 @@ vim.g.bigfile_size = 1024 * 1024 * 1.5 -- 1.5 MB
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+vim.lsp.inlay_hint.enable(true)
+vim.g.inlay_hints_visible = true
+
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -152,7 +155,7 @@ vim.opt.smartcase = true
 
 -- Keep signcolumn on by default
 vim.opt.signcolumn = 'yes'
-vim.cmd [[set signcolumn=auto:4]]
+-- vim.cmd [[set signcolumn=auto:4]]
 
 -- Decrease update time
 vim.opt.updatetime = 300
@@ -362,6 +365,35 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function()
     vim.highlight.on_yank { timeout = 300 }
   end,
+})
+
+-- Function to check if a floating dialog exists and if not
+-- then check for diagnostics under the cursor
+function OpenDiagnosticIfNoFloat()
+  for _, winid in pairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_config(winid).zindex then
+      return
+    end
+  end
+  -- THIS IS FOR BUILTIN LSP
+  vim.diagnostic.open_float(0, {
+    scope = 'cursor',
+    focusable = false,
+    close_events = {
+      'CursorMoved',
+      'CursorMovedI',
+      'BufHidden',
+      'InsertCharPre',
+      'WinLeave',
+    },
+  })
+end
+-- Show diagnostics under the cursor when holding position
+vim.api.nvim_create_augroup('lsp_diagnostics_hold', { clear = true })
+vim.api.nvim_create_autocmd({ 'CursorHold' }, {
+  pattern = '*',
+  command = 'lua OpenDiagnosticIfNoFloat()',
+  group = 'lsp_diagnostics_hold',
 })
 
 vim.filetype.add {
@@ -947,19 +979,21 @@ require('lazy').setup({
             [vim.diagnostic.severity.HINT] = '󰌶 ',
           },
         },
-        virtual_text = {
-          source = 'if_many',
-          spacing = 2,
-          format = function(diagnostic)
-            local diagnostic_message = {
-              [vim.diagnostic.severity.ERROR] = diagnostic.message,
-              [vim.diagnostic.severity.WARN] = diagnostic.message,
-              [vim.diagnostic.severity.INFO] = diagnostic.message,
-              [vim.diagnostic.severity.HINT] = diagnostic.message,
-            }
-            return diagnostic_message[diagnostic.severity]
-          end,
-        },
+        -- NOTE: disabled virtual text as it can be noisy
+        virtual_text = false,
+        -- virtual_text = {
+        --   source = 'if_many',
+        --   spacing = 2,
+        --   format = function(diagnostic)
+        --     local diagnostic_message = {
+        --       [vim.diagnostic.severity.ERROR] = diagnostic.message,
+        --       [vim.diagnostic.severity.WARN] = diagnostic.message,
+        --       [vim.diagnostic.severity.INFO] = diagnostic.message,
+        --       [vim.diagnostic.severity.HINT] = diagnostic.message,
+        --     }
+        --     return diagnostic_message[diagnostic.severity]
+        --   end,
+        -- },
       }
 
       -- LSP servers and clients are able to communicate to each other what features they support.
@@ -981,22 +1015,59 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         gopls = {},
-        pyright = {
+        -- pyright = {
+        --   disableLanguageServices = true,
+        --   -- use Ruff's import organizer
+        --   disableOrganizeImports = true,
+        --   filetypes = { 'python' },
+        --   settings = {
+        --     python = {
+        --       analysis = {
+        --         -- Ignore all files for analysis to exlusively use Ruff for linting
+        --         -- ignore = { '*' },
+        --         autoSearchPaths = true,
+        --         diagnosticMode = 'workspace',
+        --         useLibraryCodeForTypes = true,
+        --         typeCheckingMode = 'basic',
+        --         autoImportCompletions = true,
+        --       },
+        --     },
+        --   },
+        -- },
+        basedpyright = {
           -- use Ruff's import organizer
           disableOrganizeImports = true,
           filetypes = { 'python' },
           settings = {
-            python = {
+            basedpyright = {
               analysis = {
-                -- Ignore all files for analysis to exlusively use Ruff for linting
-                -- ignore = { '*' },
                 autoSearchPaths = true,
                 diagnosticMode = 'workspace',
                 useLibraryCodeForTypes = true,
-                typeCheckingMode = 'basic',
-                autoImportCompletions = true,
+                diagnosticSeverityOverrides = {
+                  reportWildcardImportFromLibrary = 'error',
+                  reportUnusedImport = 'information',
+                  reportUnusedClass = 'information',
+                  reportUnusedFunction = 'warning',
+                  reportOptionalMemberAccess = 'error',
+                  reportUnknownVariableType = 'warning',
+                  reportUnusedCallResult = 'none',
+                },
               },
             },
+          },
+
+          -- NOTE: disable LSP disagnostics for basedpyright when using pyright, just use it for inlay hints
+          -- handlers = {
+          --   -- ['textDocument/publishDiagnostics'] = function() end,
+          --   -- ['textDocument/rename'] = function() end,
+          -- },
+        },
+        ruff = {
+          -- NOTE: disable LSP disagnostics for ruff
+          handlers = {
+            ['textDocument/publishDiagnostics'] = function() end,
+            ['textDocument/rename'] = function() end,
           },
         },
         -- pylsp = {
@@ -1105,6 +1176,29 @@ require('lazy').setup({
         },
       }
     end,
+    opts = {
+      servers = {
+        basedpyright = {
+          settings = {
+            basedpyright = {
+              analysis = {
+                diagnosticSeverityOverrides = {
+                  reportWildcardImportFromLibrary = 'none',
+                  reportUnusedImport = 'information',
+                  reportUnusedClass = 'information',
+                  reportUnusedFunction = 'information',
+                  reportOptionalMemberAccess = 'none',
+                  reportUnknownVariableType = 'none',
+                  -- reportUnusedCallResult = 'none',
+                  reportUnusedCallResult = false,
+                },
+              },
+              disableTaggedHints = true,
+            },
+          },
+        },
+      },
+    },
   },
 
   { -- Autoformat
@@ -1283,6 +1377,38 @@ require('lazy').setup({
           { name = 'path' },
           { name = 'copilot', group_index = 2 },
         },
+        -- NOTE: taken from TJ here https://github.com/tjdevries/config_manager/blob/78608334a7803a0de1a08a9a4bd1b03ad2a5eb11/xdg_config/nvim/after/plugin/completion.lua#L129
+        ---@diagnostic disable-next-line: missing-fields
+        sorting = {
+          -- TODO: Would be cool to add stuff like "See variable names before method names" in rust, or something like that.
+          comparators = {
+            cmp.config.compare.offset,
+            cmp.config.compare.exact,
+            cmp.config.compare.score,
+            cmp.config.compare.recently_used,
+            cmp.config.compare.locality,
+
+            -- copied from cmp-under, but I don't think I need the plugin for this.
+            -- I might add some more of my own.
+            function(entry1, entry2)
+              local _, entry1_under = entry1.completion_item.label:find '^_+'
+              local _, entry2_under = entry2.completion_item.label:find '^_+'
+              entry1_under = entry1_under or 0
+              entry2_under = entry2_under or 0
+              if entry1_under > entry2_under then
+                return false
+              elseif entry1_under < entry2_under then
+                return true
+              end
+            end,
+
+            cmp.config.compare.kind,
+            cmp.config.compare.sort_text,
+            cmp.config.compare.length,
+            cmp.config.compare.order,
+          },
+        },
+
         ---@diagnostic disable-next-line: missing-fields
         performance = {
           max_view_entries = 30,
