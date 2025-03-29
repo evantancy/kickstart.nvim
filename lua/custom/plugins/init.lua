@@ -11,6 +11,8 @@ return {
     build = 'make install',
     config = function()
       vim.g.pydocstring_formatter = 'google' -- 'google', 'numpy', 'sphinx'
+      vim.cmd [[nmap <silent> <leader>dg <Plug>(pydocstring)]]
+      vim.keymap.set('n', '<leader>dg', '<Plug>(pydocstring)', { desc = 'docstring generate' })
     end,
   },
   {
