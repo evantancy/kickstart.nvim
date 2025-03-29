@@ -214,9 +214,6 @@ vim.cmd [[
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
-vim.keymap.set({ 'n', 'x' }, '<leader>rr', function()
-  require('telescope').extensions.refactoring.refactors()
-end, { desc = 'Toggle [R]efactoring menu' })
 
 -- toggle diagnostics for current buffer
 vim.keymap.set('n', '<leader>td', function()
@@ -421,7 +418,9 @@ end
 vim.api.nvim_create_augroup('lsp_diagnostics_hold', { clear = true })
 vim.api.nvim_create_autocmd({ 'CursorHold' }, {
   pattern = '*',
-  command = 'lua OpenDiagnosticIfNoFloat()',
+  callback = function(event)
+    OpenDiagnosticIfNoFloat()
+  end,
   group = 'lsp_diagnostics_hold',
 })
 
@@ -638,6 +637,7 @@ require('lazy').setup({
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      -- { 'nvim-telescope/telescope-frecency.nvim' },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -776,9 +776,10 @@ require('lazy').setup({
       }
 
       -- Enable Telescope extensions if they are installed
-      pcall(require('telescope').load_extension, 'fzf')
-      pcall(require('telescope').load_extension, 'ui-select')
-      pcall(require('telescope').load_extension, 'todo-comments')
+      require('telescope').load_extension 'fzf'
+      require('telescope').load_extension 'ui-select'
+      require('telescope').load_extension 'todo-comments'
+      -- pcall(require('telescope').load_extension, 'frecency')
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
@@ -914,7 +915,8 @@ require('lazy').setup({
 
           -- Find references for the word under your cursor.
           -- goto references
-          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          -- map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          map('gr', require('fzf-lua').lsp_references, 'Goto References')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
