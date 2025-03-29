@@ -158,10 +158,10 @@ vim.opt.signcolumn = 'yes'
 -- vim.cmd [[set signcolumn=auto:4]]
 
 -- Decrease update time
-vim.opt.updatetime = 300
+vim.opt.updatetime = 100
 
 -- Decrease mapped sequence wait time
-vim.opt.timeoutlen = 300
+vim.opt.timeoutlen = 150
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -519,7 +519,7 @@ require('lazy').setup({
       },
       current_line_blame_formatter = '<author>, <author_time:%R> - <summary>',
       sign_priority = 6,
-      update_debounce = 100,
+      update_debounce = 25,
       status_formatter = nil, -- Use default
       max_file_length = 40000, -- Disable if file is longer than this (in lines)
       preview_config = {
@@ -1050,28 +1050,37 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+
+      ---@type lspconfig.options
       local servers = {
         -- clangd = {},
         gopls = {},
-        -- pyright = {
-        --   disableLanguageServices = true,
-        --   -- use Ruff's import organizer
-        --   disableOrganizeImports = true,
-        --   filetypes = { 'python' },
-        --   settings = {
-        --     python = {
-        --       analysis = {
-        --         -- Ignore all files for analysis to exlusively use Ruff for linting
-        --         -- ignore = { '*' },
-        --         autoSearchPaths = true,
-        --         diagnosticMode = 'workspace',
-        --         useLibraryCodeForTypes = true,
-        --         typeCheckingMode = 'basic',
-        --         autoImportCompletions = true,
-        --       },
-        --     },
-        --   },
-        -- },
+
+        -- NOTE: use pyright for type checking,
+        -- use basedpyright for inlay hints + better code actions
+        -- use ruff for formatting
+        pyright = {
+          disableLanguageServices = true,
+          -- use Ruff's import organizer
+          disableOrganizeImports = true,
+          filetypes = { 'python' },
+          settings = {
+            python = {
+              analysis = {
+                -- Ignore all files for analysis to exlusively use Ruff for linting
+                -- ignore = { '*' },
+                autoSearchPaths = true,
+                diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
+                useLibraryCodeForTypes = true,
+                typeCheckingMode = 'basic',
+                autoImportCompletions = true,
+              },
+            },
+          },
+          handlers = {
+            ['textDocument/codeaction'] = function() end,
+          },
+        },
         basedpyright = {
           -- use Ruff's import organizer
           disableOrganizeImports = true,
@@ -1080,7 +1089,7 @@ require('lazy').setup({
             basedpyright = {
               analysis = {
                 autoSearchPaths = true,
-                diagnosticMode = 'workspace',
+                diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
                 useLibraryCodeForTypes = true,
                 diagnosticSeverityOverrides = {
                   reportWildcardImportFromLibrary = 'error',
@@ -1095,11 +1104,9 @@ require('lazy').setup({
             },
           },
 
-          -- NOTE: disable LSP disagnostics for basedpyright when using pyright, just use it for inlay hints
-          -- handlers = {
-          --   -- ['textDocument/publishDiagnostics'] = function() end,
-          --   -- ['textDocument/rename'] = function() end,
-          -- },
+          handlers = {
+            ['textDocument/publishDiagnostics'] = function() end,
+          },
         },
         ruff = {
           -- NOTE: disable LSP disagnostics for ruff
@@ -1411,7 +1418,9 @@ require('lazy').setup({
           { name = 'nvim_lsp_signature_help' },
           { name = 'codecompanion' },
           { name = 'luasnip' },
-          { name = 'buffer' },
+          { name = 'buffer', option = {
+            indexing_interval = 1000,
+          } },
           { name = 'path' },
           { name = 'copilot', group_index = 2 },
         },
@@ -1449,8 +1458,8 @@ require('lazy').setup({
 
         ---@diagnostic disable-next-line: missing-fields
         performance = {
-          max_view_entries = 30,
-          debounce = 100,
+          max_view_entries = 10,
+          debounce = 25,
         },
         ---@diagnostic disable-next-line: missing-fields
         formatting = {
@@ -1497,7 +1506,9 @@ require('lazy').setup({
         sources = cmp.config.sources({
           { name = 'nvim_lsp_document_symbol' },
         }, {
-          { name = 'buffer' },
+          { name = 'buffer', option = {
+            indexing_interval = 1000,
+          } },
         }),
         mapping = cmp.mapping.preset.cmdline(mappings),
       })
@@ -1510,7 +1521,7 @@ require('lazy').setup({
           { name = 'cmdline' },
         }),
         ---@diagnostic disable-next-line: missing-fields
-        matching = { disallow_symbol_nonprefix_matching = false },
+        matching = { disallow_symbol_nonprefix_matching = false, disallow_fullfuzzy_matching = false, disallow_prefix_unmatching = false },
         mapping = cmp.mapping.preset.cmdline(mappings),
       })
     end,
@@ -1673,7 +1684,7 @@ require('lazy').setup({
           additional_vim_regex_highlighting = { 'ruby' },
         },
         -- NOTE: disabled here because of some weird stuff happening with python
-        indent = { enable = true, disable = { 'ruby', 'python' } },
+        indent = { enable = false, disable = { 'ruby', 'python' } },
         incremental_selection = {
           enable = true,
           keymaps = {
