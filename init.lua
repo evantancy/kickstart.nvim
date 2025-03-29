@@ -84,6 +84,12 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+-- NOTE: tbh this is same as Maria's
+local map = function(keys, func, desc, mode)
+  mode = mode or 'n'
+  vim.keymap.set(mode, keys, func, { desc = desc })
+end
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -780,6 +786,10 @@ require('lazy').setup({
           find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' },
         }
       end, { desc = '[S]earch [F]iles' })
+      -- map('<leader>sf', function()
+      --   require('fzf-lua').files { file_icons = true, winopts = { split = 'belowright new' } }
+      -- end, 'Search Files')
+
       vim.keymap.set('n', '<leader><C-e>', builtin.command_history, { desc = 'Open command history in Telescope' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
@@ -917,11 +927,14 @@ require('lazy').setup({
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('<leader>sw', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Search [S]ymbols in [W]orkspace')
+          -- map('<leader>sw', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Search [S]ymbols in [W]orkspace')
+          map('<leader>sw', function()
+            require('fzf-lua').lsp_live_workspace_symbols { winopts = { preview = { layout = 'vertical', vertical = 'up:60%' } } }
+          end, 'Search Symbols in Workspace')
 
           -- map('gs', vim.lsp.buf.signature_help, '[G]oto [S]ignature')
 
-          map('K', vim.lsp.buf.hover, 'Show LSP shit under cursor')
+          map('K', vim.lsp.buf.hover, 'Show LSP stuff under cursor')
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
           map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
@@ -990,7 +1003,7 @@ require('lazy').setup({
             -- Jump to the definition of the word under your cursor.
             --  This is where a variable was first declared, or where a function is defined, etc.
             --  To jump back, press <C-t>.
-            -- NOTE: trying out fzflua
+            -- NOTE: trying out fzflua, we do this to allow peeking without navigating
             -- map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
             map('gd', function()
               require('fzf-lua').lsp_definitions { jump1 = false }
@@ -1059,8 +1072,8 @@ require('lazy').setup({
         -- NOTE: use pyright for type checking,
         -- use basedpyright for inlay hints + better code actions
         -- use ruff for formatting
+
         pyright = {
-          disableLanguageServices = true,
           -- use Ruff's import organizer
           disableOrganizeImports = true,
           filetypes = { 'python' },
