@@ -679,22 +679,28 @@ require('lazy').setup({
         defaults = {
           mappings = {
             i = {
-              ['<C-f>'] = actions.to_fuzzy_refine, -- convert non-fuzzy to fuzzy
+              -- consistent with fzf-lua if i ever change
+              ['<C-g>'] = actions.to_fuzzy_refine, -- convert non-fuzzy to fuzzy
               ['<C-j>'] = actions.move_selection_next,
               ['<C-k>'] = actions.move_selection_previous,
               ['<C-q>'] = actions.send_to_qflist,
               ['<C-t>'] = open_with_trouble,
               ['<C-d>'] = actions.delete_buffer,
+              ['<C-f>'] = actions.preview_scrolling_down,
+              ['<C-b>'] = actions.preview_scrolling_up,
             },
             n = {
-              ['<C-c>'] = actions.close,
-              ['<esc>'] = actions.close,
-              ['<C-f>'] = actions.to_fuzzy_refine, -- convert non-fuzzy to fuzzy
+              -- consistent with fzf-lua if i ever change
+              ['<C-g>'] = actions.to_fuzzy_refine, -- convert non-fuzzy to fuzzy
               ['<C-j>'] = actions.move_selection_next,
               ['<C-k>'] = actions.move_selection_previous,
               ['<C-q>'] = actions.send_to_qflist,
               ['<C-t>'] = open_with_trouble,
               ['<C-d>'] = actions.delete_buffer,
+              ['<C-f>'] = actions.preview_scrolling_down,
+              ['<C-b>'] = actions.preview_scrolling_up,
+              ['<C-c>'] = actions.close,
+              ['<esc>'] = actions.close,
             },
           },
           dynamic_preview_title = true,
