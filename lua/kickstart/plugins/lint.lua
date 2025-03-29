@@ -7,7 +7,8 @@ return {
       local lint = require 'lint'
       lint.linters_by_ft = {
         markdown = { 'markdownlint' },
-        python = { 'ruff' },
+        -- NOTE: disable here to avoid Ruff showing up since nvim-lspconfig already handles
+        -- python = { 'ruff' },
       }
 
       -- -- NOTE: here you can define diagnostics per namespace,

@@ -4,6 +4,12 @@
 -- See the kickstart.nvim README for more information
 return {
   {
+    'ibhagwan/fzf-lua',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    opts = {},
+  },
+
+  {
     -- Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python' }
     -- NOTE: this is the only plugin that works well for python
     -- tried vim-doge and neogen as well
@@ -11,8 +17,11 @@ return {
     build = 'make install',
     config = function()
       vim.g.pydocstring_formatter = 'google' -- 'google', 'numpy', 'sphinx'
+      vim.cmd [[nmap <silent> <leader>dg <Plug>(pydocstring)]]
+      vim.keymap.set('n', '<leader>dg', '<Plug>(pydocstring)', { desc = 'docstring generate' })
     end,
   },
+
   {
     'stevearc/oil.nvim',
     -- Optional dependencies
@@ -70,6 +79,7 @@ return {
       }
     end,
   },
+
   {
     'ruifm/gitlinker.nvim',
     config = function()
@@ -101,6 +111,7 @@ return {
       }
     end,
   },
+
   {
     'luukvbaal/statuscol.nvim',
     config = function()
@@ -123,6 +134,7 @@ return {
       }
     end,
   },
+
   {
     'ThePrimeagen/refactoring.nvim',
     dependencies = {
@@ -134,6 +146,7 @@ return {
       require('refactoring').setup()
     end,
   },
+
   {
     'vyfor/cord.nvim',
     enabled = false,
@@ -270,6 +283,7 @@ return {
       }
     end,
   },
+
   {
     'akinsho/git-conflict.nvim',
     version = '*',
@@ -287,6 +301,7 @@ return {
       }
     end,
   },
+
   {
     'Bekaboo/dropbar.nvim',
     -- optional, but required for fuzzy finder support
@@ -301,6 +316,7 @@ return {
       vim.keymap.set('n', '];', dropbar_api.select_next_context, { desc = 'Select next context' })
     end,
   },
+
   {
     'yetone/avante.nvim',
     enabled = false,
@@ -364,6 +380,7 @@ return {
       },
     },
   },
+
   {
     'olimorris/codecompanion.nvim',
     enabled = true,
@@ -396,6 +413,7 @@ return {
       }
     end,
   },
+
   { -- Visualize undo trees
     'mbbill/undotree',
   },
@@ -404,6 +422,7 @@ return {
     'chrisgrieser/nvim-puppeteer',
     lazy = false, -- plugin lazy-loads itself. Can also load on filetypes.
   },
+
   {
     'ggandor/leap.nvim',
     dependencies = {
@@ -419,6 +438,7 @@ return {
       case_insensitive_regex = true,
     },
   },
+
   {
     'zbirenbaum/copilot-cmp',
     config = function()
@@ -426,6 +446,7 @@ return {
     end,
     dependencies = 'zbirenbaum/copilot.lua',
   },
+
   {
     'zbirenbaum/copilot.lua',
     cmd = 'Copilot',
@@ -482,7 +503,9 @@ return {
       end, { desc = '[T]oggle [C]opilot' })
     end,
   },
+
   { 'akinsho/bufferline.nvim', version = '*', dependencies = 'nvim-tree/nvim-web-devicons', opts = {} },
+
   {
     'folke/trouble.nvim',
     opts = {}, -- for default options, refer to the configuration section for custom setup.
@@ -530,6 +553,7 @@ return {
       },
     },
   },
+
   {
     -- Harpoon
     'ThePrimeagen/harpoon',
@@ -592,6 +616,7 @@ return {
       end)
     end,
   },
+
   {
     'RRethy/vim-illuminate',
     enabled = false,
@@ -661,6 +686,7 @@ return {
       }
     end,
   },
+
   -- {
   --   'kylechui/nvim-surround',
   --   version = '*', -- Use for stability; omit to use `main` branch for the latest features

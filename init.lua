@@ -84,6 +84,12 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+-- NOTE: tbh this is same as Maria's
+local map = function(keys, func, desc, mode)
+  mode = mode or 'n'
+  vim.keymap.set(mode, keys, func, { desc = desc })
+end
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -158,10 +164,10 @@ vim.opt.signcolumn = 'yes'
 -- vim.cmd [[set signcolumn=auto:4]]
 
 -- Decrease update time
-vim.opt.updatetime = 300
+vim.opt.updatetime = 100
 
 -- Decrease mapped sequence wait time
-vim.opt.timeoutlen = 300
+vim.opt.timeoutlen = 150
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -340,7 +346,13 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', { desc = 'Goto prev [d]iagnostic' })
 vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', { desc = 'Goto next [d]iagnostic' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+-- vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '[e', function()
+  vim.diagnostic.goto_prev { severity = vim.diagnostic.severity.ERROR }
+end, { desc = 'Goto previous error' })
+vim.keymap.set('n', ']e', function()
+  vim.diagnostic.goto_next { severity = vim.diagnostic.severity.ERROR }
+end, { desc = 'Goto next error' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -513,7 +525,7 @@ require('lazy').setup({
       },
       current_line_blame_formatter = '<author>, <author_time:%R> - <summary>',
       sign_priority = 6,
-      update_debounce = 100,
+      update_debounce = 25,
       status_formatter = nil, -- Use default
       max_file_length = 40000, -- Disable if file is longer than this (in lines)
       preview_config = {
@@ -774,6 +786,10 @@ require('lazy').setup({
           find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' },
         }
       end, { desc = '[S]earch [F]iles' })
+      -- map('<leader>sf', function()
+      --   require('fzf-lua').files { file_icons = true, winopts = { split = 'belowright new' } }
+      -- end, 'Search Files')
+
       vim.keymap.set('n', '<leader><C-e>', builtin.command_history, { desc = 'Open command history in Telescope' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
@@ -911,11 +927,14 @@ require('lazy').setup({
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('<leader>sw', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Search [S]ymbols in [W]orkspace')
+          -- map('<leader>sw', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Search [S]ymbols in [W]orkspace')
+          map('<leader>sw', function()
+            require('fzf-lua').lsp_live_workspace_symbols { winopts = { preview = { layout = 'vertical', vertical = 'up:60%' } } }
+          end, 'Search Symbols in Workspace')
 
           -- map('gs', vim.lsp.buf.signature_help, '[G]oto [S]ignature')
 
-          map('K', vim.lsp.buf.hover, 'Show LSP shit under cursor')
+          map('K', vim.lsp.buf.hover, 'Show LSP stuff under cursor')
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
           map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
@@ -984,7 +1003,7 @@ require('lazy').setup({
             -- Jump to the definition of the word under your cursor.
             --  This is where a variable was first declared, or where a function is defined, etc.
             --  To jump back, press <C-t>.
-            -- NOTE: trying out fzflua
+            -- NOTE: trying out fzflua, we do this to allow peeking without navigating
             -- map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
             map('gd', function()
               require('fzf-lua').lsp_definitions { jump1 = false }
@@ -1044,28 +1063,37 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+
+      ---@type lspconfig.options
       local servers = {
         -- clangd = {},
         gopls = {},
-        -- pyright = {
-        --   disableLanguageServices = true,
-        --   -- use Ruff's import organizer
-        --   disableOrganizeImports = true,
-        --   filetypes = { 'python' },
-        --   settings = {
-        --     python = {
-        --       analysis = {
-        --         -- Ignore all files for analysis to exlusively use Ruff for linting
-        --         -- ignore = { '*' },
-        --         autoSearchPaths = true,
-        --         diagnosticMode = 'workspace',
-        --         useLibraryCodeForTypes = true,
-        --         typeCheckingMode = 'basic',
-        --         autoImportCompletions = true,
-        --       },
-        --     },
-        --   },
-        -- },
+
+        -- NOTE: use pyright for type checking,
+        -- use basedpyright for inlay hints + better code actions
+        -- use ruff for formatting
+
+        pyright = {
+          -- use Ruff's import organizer
+          disableOrganizeImports = true,
+          filetypes = { 'python' },
+          settings = {
+            python = {
+              analysis = {
+                -- Ignore all files for analysis to exlusively use Ruff for linting
+                -- ignore = { '*' },
+                autoSearchPaths = true,
+                diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
+                useLibraryCodeForTypes = true,
+                typeCheckingMode = 'basic',
+                autoImportCompletions = true,
+              },
+            },
+          },
+          handlers = {
+            ['textDocument/codeaction'] = function() end,
+          },
+        },
         basedpyright = {
           -- use Ruff's import organizer
           disableOrganizeImports = true,
@@ -1074,7 +1102,7 @@ require('lazy').setup({
             basedpyright = {
               analysis = {
                 autoSearchPaths = true,
-                diagnosticMode = 'workspace',
+                diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
                 useLibraryCodeForTypes = true,
                 diagnosticSeverityOverrides = {
                   reportWildcardImportFromLibrary = 'error',
@@ -1089,11 +1117,9 @@ require('lazy').setup({
             },
           },
 
-          -- NOTE: disable LSP disagnostics for basedpyright when using pyright, just use it for inlay hints
-          -- handlers = {
-          --   -- ['textDocument/publishDiagnostics'] = function() end,
-          --   -- ['textDocument/rename'] = function() end,
-          -- },
+          handlers = {
+            ['textDocument/publishDiagnostics'] = function() end,
+          },
         },
         ruff = {
           -- NOTE: disable LSP disagnostics for ruff
@@ -1405,7 +1431,9 @@ require('lazy').setup({
           { name = 'nvim_lsp_signature_help' },
           { name = 'codecompanion' },
           { name = 'luasnip' },
-          { name = 'buffer' },
+          { name = 'buffer', option = {
+            indexing_interval = 1000,
+          } },
           { name = 'path' },
           { name = 'copilot', group_index = 2 },
         },
@@ -1443,8 +1471,8 @@ require('lazy').setup({
 
         ---@diagnostic disable-next-line: missing-fields
         performance = {
-          max_view_entries = 30,
-          debounce = 100,
+          max_view_entries = 10,
+          debounce = 25,
         },
         ---@diagnostic disable-next-line: missing-fields
         formatting = {
@@ -1491,7 +1519,9 @@ require('lazy').setup({
         sources = cmp.config.sources({
           { name = 'nvim_lsp_document_symbol' },
         }, {
-          { name = 'buffer' },
+          { name = 'buffer', option = {
+            indexing_interval = 1000,
+          } },
         }),
         mapping = cmp.mapping.preset.cmdline(mappings),
       })
@@ -1504,7 +1534,7 @@ require('lazy').setup({
           { name = 'cmdline' },
         }),
         ---@diagnostic disable-next-line: missing-fields
-        matching = { disallow_symbol_nonprefix_matching = false },
+        matching = { disallow_symbol_nonprefix_matching = false, disallow_fullfuzzy_matching = false, disallow_prefix_unmatching = false },
         mapping = cmp.mapping.preset.cmdline(mappings),
       })
     end,
@@ -1667,7 +1697,7 @@ require('lazy').setup({
           additional_vim_regex_highlighting = { 'ruby' },
         },
         -- NOTE: disabled here because of some weird stuff happening with python
-        indent = { enable = true, disable = { 'ruby', 'python' } },
+        indent = { enable = false, disable = { 'ruby', 'python' } },
         incremental_selection = {
           enable = true,
           keymaps = {
