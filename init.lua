@@ -705,7 +705,7 @@ require('lazy').setup({
           },
           dynamic_preview_title = true,
           -- history = false,
-          layout_strategy = 'horizontal',
+          layout_strategy = 'vertical',
           layout_config = {
             scroll_speed = 10,
             horizontal = {
@@ -727,7 +727,7 @@ require('lazy').setup({
             '--smart-case',
             '--glob=!.git/',
           },
-          prompt_prefix = '> ',
+          prompt_prefix = '🔍 ',
           selection_caret = '>> ',
           color_devicons = true,
           path_display = {
@@ -747,9 +747,6 @@ require('lazy').setup({
               return { prompt = prompt:gsub('%s', '.*') }
             end,
           },
-          -- find_files = {
-          --   theme = 'ivy',
-          -- },
         },
         extensions = {
           ['ui-select'] = {
@@ -757,7 +754,8 @@ require('lazy').setup({
               previewer = false,
               initial_mode = 'normal',
               sorting_strategy = 'ascending',
-              layout_strategy = 'horizontal',
+              layout_strategy = 'vertical',
+              prompt_position = 'bottom',
               layout_config = {
                 horizontal = {
                   width = 0.5,
@@ -899,6 +897,8 @@ require('lazy').setup({
       --    That is to say, every time a new file is opened that is associated with
       --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
       --    function will be executed to configure the current buffer
+      -- NOTE: enable line numbers in telescope previewer
+      vim.cmd 'autocmd User TelescopePreviewerLoaded setlocal number'
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
