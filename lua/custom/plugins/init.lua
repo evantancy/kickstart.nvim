@@ -348,30 +348,27 @@ return {
 
   {
     'yetone/avante.nvim',
-    enabled = false,
     event = 'VeryLazy',
-    version = false, -- Never set this value to "*"! Never!
+    lazy = false,
+    version = false, -- Set this to "*" to always pull the latest release version, or set it to false to update to the latest code changes.
     opts = {
-      -- add any opts here
-      -- for example
-      provider = 'openai',
-      openai = {
-        endpoint = 'https://openrouter.ai/api',
-        model = 'anthropic/claude-3.7-sonnet', -- your desired model (or use gpt-4o, etc.)
-        timeout = 30000, -- Timeout in milliseconds, increase this for reasoning models
-        temperature = 0,
-        max_completion_tokens = 8192, -- Increase this to include reasoning tokens (for reasoning models)
-        --reasoning_effort = "medium", -- low|medium|high, only used for reasoning models
+      provider = 'openrouter',
+      vendors = {
+        openrouter = {
+          __inherited_from = 'openai',
+          endpoint = 'https://openrouter.ai/api/v1',
+          api_key_name = 'OPENROUTER_API_KEY',
+          model = 'anthropic/claude-3.7-sonnet',
+          -- NOTE: see https://github.com/yetone/avante.nvim/issues/1188
+          -- model = 'deepseek/deepseek-r1:free',
+          -- disable_tools = true,
+        },
       },
     },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = 'make',
     -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
-    config = function()
-      vim.env.OPENAI_API_KEY = 'cmd: EDITOR=cat sops -d ~/.openrouter-api-key.enc 2>/dev/null'
-    end,
     dependencies = {
-      'nvim-treesitter/nvim-treesitter',
       'stevearc/dressing.nvim',
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
@@ -412,7 +409,7 @@ return {
 
   {
     'olimorris/codecompanion.nvim',
-    enabled = true,
+    enabled = false,
     dependencies = {
       { 'nvim-lua/plenary.nvim' },
       { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' },

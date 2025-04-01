@@ -84,6 +84,18 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+local source_env_vars = function()
+  local handle = io.popen 'EDITOR=cat sops -d ~/.openrouter-api-key.enc 2>/dev/null'
+  local result = handle:read '*a'
+  handle:close()
+
+  vim.env.OPENAI_API_KEY = result:match 'OPENROUTER_API_KEY=(%S+)'
+  vim.env.ANTHROPIC_API_KEY = result:match 'OPENROUTER_API_KEY=(%S+)'
+  vim.env.OPENROUTER_API_KEY = result:match 'OPENROUTER_API_KEY=(%S+)'
+end
+
+source_env_vars()
+
 -- NOTE: tbh this is same as Maria's
 local map = function(keys, func, desc, mode)
   mode = mode or 'n'
