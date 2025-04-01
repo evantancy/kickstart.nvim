@@ -110,10 +110,13 @@ local code_actions_picker = function(opts)
             local context = entry.context
             local type = entry.type
 
+            local entry_display = '[' .. client_name .. ' (' .. client_id .. ') ' .. '] ' .. action.title .. ' (' .. action.kind .. ')'
+
             return {
               value = entry,
-              display = '[' .. entry.client_name .. '] ' .. entry.action.title .. ' (' .. entry.action.kind .. ')',
-              ordinal = action.title,
+              display = entry_display,
+              -- NOTE: we make sorting/filtering by entry.action.kind available by including it in the message
+              ordinal = entry_display,
             }
           end,
         },
