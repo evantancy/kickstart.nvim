@@ -836,8 +836,7 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
       -- NOTE: telescope specific custom plugins
       require('kickstart.plugins.telescope-multigrep').setup()
-      -- require('kickstart.plugins.telescope-codeactions').setup()
-      require('kickstart.plugins.test_ca').setup()
+      require('kickstart.plugins.telescope-codeaction').setup()
     end,
   },
   -- LSP Plugins
