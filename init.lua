@@ -1077,6 +1077,7 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         gopls = {},
+        marksman = {},
 
         -- NOTE: use pyright for type checking,
         -- use basedpyright for inlay hints + better code actions
