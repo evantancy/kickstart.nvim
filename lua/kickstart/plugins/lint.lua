@@ -6,7 +6,7 @@ return {
     config = function()
       local lint = require 'lint'
       lint.linters_by_ft = {
-        markdown = { 'markdownlint' },
+        -- markdown = { 'marksman' },
         -- NOTE: disable here to avoid Ruff showing up since nvim-lspconfig already handles
         -- python = { 'ruff' },
       }
