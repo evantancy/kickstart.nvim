@@ -1,61 +1,131 @@
 local M = {}
+local pickers = require 'telescope.pickers'
+local finders = require 'telescope.finders'
+local actions = require 'telescope.actions'
+local action_state = require 'telescope.actions.state'
+local conf = require('telescope.config').values
 
--- TODO: add prime's refactoring.nvim to code actions
+-- define some constants
+local ActionType = {
+  lsp = 'builtin LSP',
+  refactoring = 'refactoring.nvim',
+}
 
--- Function to get code actions as a table from all LSPs
-function M.GetCodeActions()
+local function apply_action(action, client)
+  local offset_encoding = client.offset_encoding
+
+  if action.edit then
+    vim.lsp.util.apply_workspace_edit(action.edit, offset_encoding)
+  end
+
+  if action.command then
+    local command = type(action.command) == 'table' and action.command or action
+    vim.lsp.buf.execute_command(command)
+  end
+end
+
+-- on action being selected via picker
+local on_action_select = function(prompt_bufnr)
+  actions.select_default:replace(function()
+    actions.close(prompt_bufnr)
+
+    local selection = action_state.get_selected_entry()
+    local client_id = selection.value.client_id
+    local client_name = selection.value.client_name
+    local action = selection.value.action
+    local context = selection.value.context
+    local type = selection.value.type
+    local client = vim.lsp.get_client_by_id(client_id)
+    if client == nil then
+      vim.notify('Client not found for client_id: ' .. client_id, vim.log.levels.ERROR)
+      return
+    end
+
+    local reg = client.dynamic_capabilities:get('textDocument/codeAction', { bufnr = current_bufnr })
+    local support_resolve = vim.tbl_get(reg or {}, 'registerOptions', 'resolveProvider') or client.supports_method 'codeAction/resolve'
+
+    if client and support_resolve then
+      client.request('codeAction/resolve', action, function(err, resolved_action)
+        if err then
+          vim.notify('Error resolving code action: ' .. vim.inspect(err), vim.log.levels.ERROR)
+          return
+        end
+
+        apply_action(resolved_action, client)
+      end)
+    else
+      apply_action(action, client)
+    end
+
+    -- map('n', '<CR>', actions.select_default)
+    -- map('i', '<CR>', actions.select_default)
+  end)
+  return true
+end
+
+-- main function
+local code_actions_picker = function(opts)
+  opts = opts or {}
+  opts.cwd = opts.cwd or vim.uv.cwd()
+
+  local current_bufnr = vim.api.nvim_get_current_buf()
   local params = vim.lsp.util.make_range_params()
   params.context = {
     diagnostics = vim.lsp.diagnostic.get_line_diagnostics(),
   }
 
-  vim.lsp.buf_request_all(0, 'textDocument/codeAction', params, function(results)
-    if not results or vim.tbl_isempty(results) then
-      print 'No code actions available'
-      return
-    end
-
-    -- Collect all code actions from all servers
-    local actions = {}
+  local current_buf_id = 0
+  vim.lsp.buf_request_all(current_buf_id, 'textDocument/codeAction', params, function(results)
+    -- TODO: integrate with prime's refactoring.nvim!!
+    local actions_list = {}
     for client_id, result in pairs(results) do
       if result.result and not vim.tbl_isempty(result.result) then
+        local client_name = vim.lsp.get_client_by_id(client_id).name
         for _, action in ipairs(result.result) do
-          -- Add client_id to each action for tracking
-          action.client_id = client_id
-          table.insert(actions, action)
+          table.insert(actions_list, {
+            client_id = client_id,
+            client_name = client_name,
+            action = action,
+            context = result.result.context,
+            type = ActionType.lsp,
+          })
         end
       end
     end
 
-    -- Print out available actions
-    if vim.tbl_isempty(actions) then
-      print 'No code actions available'
-    else
-      print 'Available code actions:'
-      for i, action in ipairs(actions) do
-        local client_name = vim.lsp.get_client_by_id(action.client_id).name or 'unknown'
-        print(i .. ': [' .. client_name .. '] ' .. (action.title or 'Unnamed action'))
-      end
-
-      -- let's print them out in a new buffer
-
-      -- Convert table to a formatted string
-      local output = vim.inspect(actions)
-      -- Create a new empty buffer
-      vim.cmd 'enew'
-      -- Split the output into individual lines
-      local lines = vim.split(output, '\n')
-      -- Set the lines in the current buffer (starting at line 0)
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
-
-      -- Store actions in a global variable for later use
-      _G.current_code_actions = actions
+    if vim.tbl_isempty(actions_list) then
+      vim.notify('No code actions available!', vim.log.levels.INFO)
+      return
     end
+
+    pickers
+      .new(opts, {
+        prompt_title = 'Code Actions (Extended)',
+        finder = finders.new_table {
+          results = actions_list,
+          entry_maker = function(entry)
+            local client_id = entry.client_id
+            local client_name = entry.client_name
+            local action = entry.action
+            local context = entry.context
+            local type = entry.type
+
+            return {
+              value = entry,
+              display = '[' .. entry.client_name .. '] ' .. entry.action.title .. ' (' .. entry.action.kind .. ')',
+              ordinal = action.title,
+            }
+          end,
+        },
+        sorter = conf.generic_sorter(opts),
+        attach_mappings = on_action_select,
+      })
+      :find()
   end)
-end -- Map to a key if desired
+end
 
 M.setup = function()
-  vim.keymap.set('n', '<leader>cA', M.GetCodeActions, { desc = 'Code actions extended' })
+  vim.keymap.set('n', '<leader>ca', code_actions_picker, { desc = 'Code actions' })
 end
 
 return M
