@@ -1158,6 +1158,7 @@ require('lazy').setup({
         -- use basedpyright for inlay hints + better code actions
         -- use ruff for formatting
 
+        -- FIXME: both pyright and basedpyright tryna rename symbol at the same time
         pyright = {
           -- use Ruff's import organizer
           disableOrganizeImports = true,
@@ -1177,6 +1178,7 @@ require('lazy').setup({
           },
           handlers = {
             ['textDocument/codeAction'] = function() end,
+            ['codeAction/resolve'] = function() end,
             ['textDocument/hover'] = vim.lsp.with(hover, {
               border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
               title = ' |･ω･) ? ',
@@ -1185,42 +1187,40 @@ require('lazy').setup({
             }),
           },
         },
-        -- FIXME: rename getting called by both pyright and basedpyright
-        -- basedpyright = {
-        --   disableLanguageServices = true,
-        --   -- use Ruff's import organizer
-        --   disableOrganizeImports = true,
-        --   filetypes = { 'python' },
-        --   settings = {
-        --     basedpyright = {
-        --       analysis = {
-        --         autoSearchPaths = true,
-        --         diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
-        --         useLibraryCodeForTypes = true,
-        --         diagnosticSeverityOverrides = {
-        --           reportWildcardImportFromLibrary = 'error',
-        --           reportUnusedImport = 'information',
-        --           reportUnusedClass = 'information',
-        --           reportUnusedFunction = 'warning',
-        --           reportOptionalMemberAccess = 'error',
-        --           reportUnknownVariableType = 'warning',
-        --           reportUnusedCallResult = 'none',
-        --         },
-        --       },
-        --     },
-        --   },
-        --   handlers = {
-        --     ['textDocument/publishDiagnostics'] = function() end,
-        --     ['codeAction/resolve'] = function() end,
-        --     ['textDocument/rename'] = function() end,
-        --     ['textDocument/hover'] = vim.lsp.with(hover, {
-        --       border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
-        --       title = ' |･ω･) ? ',
-        --       max_width = 120,
-        --       zindex = 500,
-        --     }),
-        --   },
-        -- },
+        basedpyright = {
+          -- use Ruff's import organizer
+          disableOrganizeImports = true,
+          filetypes = { 'python' },
+          settings = {
+            basedpyright = {
+              analysis = {
+                autoSearchPaths = true,
+                diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
+                useLibraryCodeForTypes = true,
+                diagnosticSeverityOverrides = {
+                  reportWildcardImportFromLibrary = 'error',
+                  reportUnusedImport = 'information',
+                  reportUnusedClass = 'information',
+                  reportUnusedFunction = 'warning',
+                  reportOptionalMemberAccess = 'error',
+                  reportUnknownVariableType = 'warning',
+                  reportUnusedCallResult = 'none',
+                },
+              },
+            },
+          },
+
+          handlers = {
+            ['textDocument/publishDiagnostics'] = function() end,
+            ['textDocument/rename'] = function() end,
+            ['textDocument/hover'] = vim.lsp.with(hover, {
+              border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
+              title = ' |･ω･) ? ',
+              max_width = 120,
+              zindex = 500,
+            }),
+          },
+        },
         ruff = {
           -- NOTE: disable LSP disagnostics for ruff
           handlers = {
