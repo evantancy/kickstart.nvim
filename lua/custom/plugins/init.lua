@@ -314,20 +314,64 @@ return {
   },
 
   {
+    'sindrets/diffview.nvim',
+    enabled = true,
+    config = function()
+      local actions = require 'diffview.actions'
+      require('diffview').setup {}
+    end,
+  },
+
+  {
     'akinsho/git-conflict.nvim',
+    enabled = false,
     version = '*',
     config = function()
       require('git-conflict').setup {
-        default_mappings = {
-          ours = 'co',
-          theirs = 'ct',
-          none = 'c0',
-          both = 'cb',
-          prev = '[x',
-          next = ']x',
-        },
-        disable_diagnostics = false, -- This will disable the diagnostics in a buffer whilst it is conflicted
+        default_mappings = true,
+        -- default_mappings = {
+        --   ours = 'co',
+        --   theirs = 'ct',
+        --   none = 'c0',
+        --   both = 'cb',
+        --   prev = '[x',
+        --   next = ']x',
+        -- },
+        disable_diagnostics = true, -- This will disable the diagnostics in a buffer whilst it is conflicted
       }
+
+      -- vim.keymap.set('n', 'co', '<Plug>(git-conflict-ours)')
+      -- vim.keymap.set('n', 'ct', '<Plug>(git-conflict-theirs)')
+      -- vim.keymap.set('n', 'cb', '<Plug>(git-conflict-both)')
+      -- vim.keymap.set('n', 'c0', '<Plug>(git-conflict-none)')
+      -- vim.keymap.set('n', '[x', '<Plug>(git-conflict-prev-conflict)')
+      -- vim.keymap.set('n', ']x', '<Plug>(git-conflict-next-conflict)')
+
+      -- when dealing with conflicts, disable diagnostics
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'GitConflictDetected',
+        callback = function(event)
+          -- Get the buffer number from the event
+          local bufnr = event.buf
+
+          -- -- Set buffer-local mappings
+          -- vim.keymap.set('n', 'co', '<Plug>(git-conflict-ours)', { buffer = bufnr })
+          -- vim.keymap.set('n', 'ct', '<Plug>(git-conflict-theirs)', { buffer = bufnr })
+          -- vim.keymap.set('n', 'cb', '<Plug>(git-conflict-both)', { buffer = bufnr })
+          -- vim.keymap.set('n', 'c0', '<Plug>(git-conflict-none)', { buffer = bufnr })
+          -- vim.keymap.set('n', '[x', '<Plug>(git-conflict-prev-conflict)', { buffer = bufnr })
+          -- vim.keymap.set('n', ']x', '<Plug>(git-conflict-next-conflict)', { buffer = bufnr })
+
+          vim.notify('Conflict detected in ' .. vim.fn.expand '<afile>' .. '. Use co/ct/cb/c0 to resolve.')
+        end,
+      })
+      -- when dealing with conflicts, disable diagnostics
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'GitConflictResolved',
+        callback = function()
+          vim.notify 'All conflicts resolved! 🎉'
+        end,
+      })
     end,
   },
 

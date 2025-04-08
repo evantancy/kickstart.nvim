@@ -179,7 +179,7 @@ vim.opt.signcolumn = 'yes'
 vim.opt.updatetime = 100
 
 -- Decrease mapped sequence wait time
-vim.opt.timeoutlen = 150
+vim.opt.timeoutlen = 200
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -1085,6 +1085,69 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 
+      -- NOTE: to fix pyright hover wrong formatting
+      local util = require 'vim.lsp.util'
+      -- The function that replace those quirky html symbols.
+      local function split_lines(value)
+        value = string.gsub(value, '&nbsp;', ' ')
+        value = string.gsub(value, '&gt;', '>')
+        value = string.gsub(value, '&lt;', '<')
+        value = string.gsub(value, '\\', '')
+        value = string.gsub(value, '```python', '')
+        value = string.gsub(value, '```', '')
+        return vim.split(value, '\n', { plain = true, trimempty = true })
+      end
+
+      -- The function name is the same as what you found in the neovim repo.
+      -- I just remove those unused codes.
+      -- Actually, this function doesn't "convert input to markdown".
+      -- I just keep the function name the same for reference.
+      local function convert_input_to_markdown_lines(input, contents)
+        contents = contents or {}
+        assert(type(input) == 'table', 'Expected a table for LSP input')
+        if input.kind then
+          local value = input.value or ''
+          vim.list_extend(contents, split_lines(value))
+        end
+        if (contents[1] == '' or contents[1] == nil) and #contents == 1 then
+          return {}
+        end
+        return contents
+      end
+
+      -- The overwritten hover function that pyright uses.
+      -- Note that other language server can use the default one.
+      local function hover(_, result, ctx, config)
+        config = config or {}
+        config.focus_id = ctx.method
+        if vim.api.nvim_get_current_buf() ~= ctx.bufnr then
+          -- Ignore result since buffer changed. This happens for slow language servers.
+          return
+        end
+        if not (result and result.contents) then
+          if config.silent ~= true then
+            vim.notify 'No information available'
+          end
+          return
+        end
+        local contents ---@type string[]
+        contents = convert_input_to_markdown_lines(result.contents)
+        if vim.tbl_isempty(contents) then
+          if config.silent ~= true then
+            vim.notify 'No information available'
+          end
+          return
+        end
+        -- Notice here. The "plaintext" string was originally "markdown".
+        -- The reason of using "plaintext" instead of "markdown" is becasue
+        -- of the bracket characters ([]). Markdown will hide single bracket,
+        -- so when your docstrings consist of numpy or pytorch or python list,
+        -- you will get garbadge hover results.
+        -- The bad side of "plaintext" is that you never get syntax highlighting.
+        -- I personally don't care about this.
+        return util.open_floating_preview(contents, 'plaintext', config)
+      end
+
       ---@type lspconfig.options
       local servers = {
         -- clangd = {},
@@ -1114,36 +1177,50 @@ require('lazy').setup({
           },
           handlers = {
             ['textDocument/codeAction'] = function() end,
-            ['codeAction/resolve'] = function() end,
+            ['textDocument/hover'] = vim.lsp.with(hover, {
+              border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
+              title = ' |･ω･) ? ',
+              max_width = 120,
+              zindex = 500,
+            }),
           },
         },
-        basedpyright = {
-          -- use Ruff's import organizer
-          disableOrganizeImports = true,
-          filetypes = { 'python' },
-          settings = {
-            basedpyright = {
-              analysis = {
-                autoSearchPaths = true,
-                diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
-                useLibraryCodeForTypes = true,
-                diagnosticSeverityOverrides = {
-                  reportWildcardImportFromLibrary = 'error',
-                  reportUnusedImport = 'information',
-                  reportUnusedClass = 'information',
-                  reportUnusedFunction = 'warning',
-                  reportOptionalMemberAccess = 'error',
-                  reportUnknownVariableType = 'warning',
-                  reportUnusedCallResult = 'none',
-                },
-              },
-            },
-          },
-
-          handlers = {
-            ['textDocument/publishDiagnostics'] = function() end,
-          },
-        },
+        -- FIXME: rename getting called by both pyright and basedpyright
+        -- basedpyright = {
+        --   disableLanguageServices = true,
+        --   -- use Ruff's import organizer
+        --   disableOrganizeImports = true,
+        --   filetypes = { 'python' },
+        --   settings = {
+        --     basedpyright = {
+        --       analysis = {
+        --         autoSearchPaths = true,
+        --         diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
+        --         useLibraryCodeForTypes = true,
+        --         diagnosticSeverityOverrides = {
+        --           reportWildcardImportFromLibrary = 'error',
+        --           reportUnusedImport = 'information',
+        --           reportUnusedClass = 'information',
+        --           reportUnusedFunction = 'warning',
+        --           reportOptionalMemberAccess = 'error',
+        --           reportUnknownVariableType = 'warning',
+        --           reportUnusedCallResult = 'none',
+        --         },
+        --       },
+        --     },
+        --   },
+        --   handlers = {
+        --     ['textDocument/publishDiagnostics'] = function() end,
+        --     ['codeAction/resolve'] = function() end,
+        --     ['textDocument/rename'] = function() end,
+        --     ['textDocument/hover'] = vim.lsp.with(hover, {
+        --       border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
+        --       title = ' |･ω･) ? ',
+        --       max_width = 120,
+        --       zindex = 500,
+        --     }),
+        --   },
+        -- },
         ruff = {
           -- NOTE: disable LSP disagnostics for ruff
           handlers = {
@@ -1257,29 +1334,6 @@ require('lazy').setup({
         },
       }
     end,
-    opts = {
-      servers = {
-        basedpyright = {
-          settings = {
-            basedpyright = {
-              analysis = {
-                diagnosticSeverityOverrides = {
-                  reportWildcardImportFromLibrary = 'none',
-                  reportUnusedImport = 'information',
-                  reportUnusedClass = 'information',
-                  reportUnusedFunction = 'information',
-                  reportOptionalMemberAccess = 'none',
-                  reportUnknownVariableType = 'none',
-                  -- reportUnusedCallResult = 'none',
-                  reportUnusedCallResult = false,
-                },
-              },
-              disableTaggedHints = true,
-            },
-          },
-        },
-      },
-    },
   },
 
   { -- Autoformat
@@ -1622,6 +1676,7 @@ require('lazy').setup({
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
+    enabled = true,
     dependencies = {
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
       {
