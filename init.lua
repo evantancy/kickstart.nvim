@@ -12,7 +12,6 @@ source_env_vars()
 
 require 'custom.settings'
 require 'custom.autocmd'
-require 'custom.lsp'
 require 'custom.bigfile'
 require 'custom.lazy_init'
 

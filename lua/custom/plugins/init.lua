@@ -3,24 +3,6 @@
 --
 -- See the kickstart.nvim README for more information
 return {
-  {
-    'ibhagwan/fzf-lua',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
-    opts = {},
-  },
-
-  {
-    -- Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python' }
-    -- NOTE: this is the only plugin that works well for python
-    -- tried vim-doge and neogen as well
-    'heavenshell/vim-pydocstring',
-    build = 'make install',
-    config = function()
-      vim.g.pydocstring_formatter = 'google' -- 'google', 'numpy', 'sphinx'
-      vim.cmd [[nmap <silent> <leader>dg <Plug>(pydocstring)]]
-      vim.keymap.set('n', '<leader>dg', '<Plug>(pydocstring)', { desc = 'docstring generate' })
-    end,
-  },
 
   {
     'stevearc/oil.nvim',
@@ -109,47 +91,6 @@ return {
         -- default mapping to call url generation with action_callback
         mappings = '<leader>gh',
       }
-    end,
-  },
-
-  {
-    'ThePrimeagen/refactoring.nvim',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'nvim-treesitter/nvim-treesitter',
-      -- 'nvim-telescope/telescope.nvim',
-    },
-    lazy = false,
-    config = function()
-      local refactoring = require 'refactoring'
-      refactoring.setup()
-      vim.keymap.set({ 'n', 'x' }, '<leader>rr', refactoring.select_refactor, { desc = 'Toggle [R]efactoring menu' })
-      vim.keymap.set({ 'n', 'x' }, '<leader>re', function()
-        return require('refactoring').refactor 'Extract Function'
-      end, { expr = true, desc = 'Extract Function' })
-      vim.keymap.set({ 'n', 'x' }, '<leader>rf', function()
-        return require('refactoring').refactor 'Extract Function To File'
-      end, { expr = true, desc = 'Extract Function To File' })
-      vim.keymap.set({ 'n', 'x' }, '<leader>rv', function()
-        return require('refactoring').refactor 'Extract Variable'
-      end, { expr = true, desc = 'Extract Variable' })
-      vim.keymap.set({ 'n', 'x' }, '<leader>rI', function()
-        return require('refactoring').refactor 'Inline Function'
-      end, { expr = true, desc = 'Inline Function' })
-      vim.keymap.set({ 'n', 'x' }, '<leader>ri', function()
-        return require('refactoring').refactor 'Inline Variable'
-      end, { expr = true, desc = 'Inline Variable' })
-
-      vim.keymap.set({ 'n', 'x' }, '<leader>rbb', function()
-        return require('refactoring').refactor 'Extract Block'
-      end, { expr = true, desc = 'Extract Block' })
-      vim.keymap.set({ 'n', 'x' }, '<leader>rbf', function()
-        return require('refactoring').refactor 'Extract Block To File'
-      end, { expr = true, desc = 'Extract Block To File' })
-
-      -- NOTE: for some reason telescope ext not working
-      -- require('telescope').load_extension 'refactoring'
-      -- vim.keymap.set({ 'n', 'x' }, '<leader>rr', require('telescope').extensions.refactoring.refactors, { desc = 'Toggle [R]efactoring menu' })
     end,
   },
 
@@ -736,39 +677,4 @@ return {
       }
     end,
   },
-
-  -- {
-  --   'kylechui/nvim-surround',
-  --   version = '*', -- Use for stability; omit to use `main` branch for the latest features
-  --   event = 'VeryLazy',
-  --   config = function()
-  --     require('nvim-surround').setup {
-  --       -- Configuration here, or leave empty to use defaults
-  --       keymaps = {
-  --         insert = '<C-g>s',
-  --         insert_line = '<C-g>S',
-  --         normal = 'ys',
-  --         normal_cur = 'yss',
-  --         normal_line = 'yS',
-  --         normal_cur_line = 'ySS',
-  --         visual = 'S',
-  --         visual_line = 'gS',
-  --         delete = 'ds',
-  --         change = 'cs',
-  --         change_line = 'cS',
-  --       },
-  --       aliases = {
-  --         ['a'] = '>',
-  --         ['b'] = ')',
-  --         ['B'] = '}',
-  --         ['r'] = ']',
-  --         ['q'] = { '"', "'", '`' },
-  --         ['s'] = { '}', ']', ')', '>', '"', "'", '`' },
-  --       },
-  --       highlight = {
-  --         duration = 1000,
-  --       },
-  --     }
-  --   end,
-  -- },
 }
