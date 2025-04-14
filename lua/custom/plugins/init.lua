@@ -113,29 +113,6 @@ return {
   },
 
   {
-    'luukvbaal/statuscol.nvim',
-    config = function()
-      -- local builtin = require("statuscol.builtin")
-      require('statuscol').setup {
-        -- configuration goes here, for example:
-        -- relculright = true,
-        -- segments = {
-        --   { text = { builtin.foldfunc }, click = "v:lua.ScFa" },
-        --   {
-        --     sign = { namespace = { "diagnostic/signs" }, maxwidth = 2, auto = true },
-        --     click = "v:lua.ScSa"
-        --   },
-        --   { text = { builtin.lnumfunc }, click = "v:lua.ScLa", },
-        --   {
-        --     sign = { name = { ".*" }, maxwidth = 2, colwidth = 1, auto = true, wrap = true },
-        --     click = "v:lua.ScSa"
-        --   },
-        -- }
-      }
-    end,
-  },
-
-  {
     'ThePrimeagen/refactoring.nvim',
     dependencies = {
       'nvim-lua/plenary.nvim',
@@ -676,6 +653,9 @@ return {
       end)
       vim.keymap.set('n', '<A-4>', function()
         harpoon:list():select(4)
+      end)
+      vim.keymap.set('n', '<A-5>', function()
+        harpoon:list():select(5)
       end)
       -- Toggle previous & next buffers stored within Harpoon list
       vim.keymap.set('n', '<A-p>', function()
