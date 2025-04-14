@@ -23,6 +23,10 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 -- TODO: unify with 'custom.plugins'
 local plugins = 'kickstart.plugins'
+-- plugins.lsp + diagnostics
+-- plugins.files
+-- plugins.autocomplete
+-- plugins.debugger
 
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
