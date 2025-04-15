@@ -53,6 +53,7 @@ return {
       },
     },
   },
+
   {
     'ruifm/gitlinker.nvim',
     config = function()
@@ -84,6 +85,7 @@ return {
       }
     end,
   },
+
   {
     'sindrets/diffview.nvim',
     enabled = true,
@@ -92,6 +94,7 @@ return {
       require('diffview').setup {}
     end,
   },
+
   {
     'akinsho/git-conflict.nvim',
     enabled = false,

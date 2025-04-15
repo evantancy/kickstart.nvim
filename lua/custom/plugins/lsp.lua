@@ -58,12 +58,12 @@ return {
     dependencies = {
       'nvim-lua/plenary.nvim',
       'nvim-treesitter/nvim-treesitter',
-      -- 'nvim-telescope/telescope.nvim',
+      'nvim-telescope/telescope.nvim',
     },
     lazy = false,
     config = function()
       local refactoring = require 'refactoring'
-      refactoring.setup()
+      refactoring.setup {}
       vim.keymap.set({ 'n', 'x' }, '<leader>rr', refactoring.select_refactor, { desc = 'Toggle [R]efactoring menu' })
       vim.keymap.set({ 'n', 'x' }, '<leader>re', function()
         return require('refactoring').refactor 'Extract Function'
@@ -101,7 +101,44 @@ return {
 
   {
     'folke/trouble.nvim',
-    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    opts = {
+      warn_no_results = false,
+      open_no_results = true,
+
+      modes = {
+        ---@class trouble.Mode: trouble.Config,trouble.Section.spec
+        diagnostics_preview = {
+          mode = 'diagnostics',
+          preview = {
+            type = 'split',
+            relative = 'win',
+            position = 'right',
+            size = 0.3,
+          },
+          filter = {
+            any = {
+              buf = 0, -- current buffer
+              {
+                severity = { vim.diagnostic.severity.ERROR, vim.diagnostic.severity.WARN },
+                -- NOTE: limit to files in the current project
+                function(item)
+                  return item.filename:find((vim.loop or vim.uv).cwd(), 1, true)
+                end,
+              },
+            },
+          },
+        },
+        symbols_custom = {
+          mode = 'symbols',
+          preview = {
+            type = 'split',
+            relative = 'editor',
+            position = 'right',
+            size = 10,
+          },
+        },
+      },
+    }, -- for default options, refer to the configuration section for custom setup.
     cmd = 'Trouble',
     dependencies = {
       'ibhagwan/fzf-lua',
@@ -115,17 +152,17 @@ return {
     keys = {
       {
         '<leader>tt',
-        '<cmd>Trouble diagnostics toggle<cr>',
+        '<cmd>Trouble diagnostics_preview toggle<cr>',
         desc = '[T]rouble Diagnostics',
       },
       {
         '<leader>tT',
-        '<cmd>Trouble diagnostics toggle filter.buf=0<cr>',
+        '<cmd>Trouble diagnostics_preview toggle filter.buf=0<cr>',
         desc = '[T]rouble Buffer Diagnostics',
       },
       {
         '<leader>ts',
-        '<cmd>Trouble symbols toggle focus=false<cr>',
+        '<cmd>Trouble symbols_custom toggle focus=false<cr>',
         desc = '[T]rouble Symbols',
       },
       -- TODO: Configure these
@@ -146,6 +183,21 @@ return {
       },
     },
   },
+
+  -- {
+  --   'stevearc/quicker.nvim',
+  --   event = 'FileType qf',
+  --   ---@module "quicker"
+  --   ---@type quicker.SetupOptions
+  --   config = function()
+  --     require('quicker').setup {
+  --       follow = {
+  --         -- When quickfix window is open, scroll to closest item to the cursor
+  --         enabled = true,
+  --       },
+  --     }
+  --   end,
+  -- },
 
   {
     'RRethy/vim-illuminate',
@@ -214,6 +266,20 @@ return {
         -- case_insensitive_regex: sets regex case sensitivity
         case_insensitive_regex = false,
       }
+      -- change the highlight style
+      vim.api.nvim_set_hl(0, 'IlluminatedWordText', { link = 'Visual' })
+      vim.api.nvim_set_hl(0, 'IlluminatedWordRead', { link = 'Visual' })
+      vim.api.nvim_set_hl(0, 'IlluminatedWordWrite', { link = 'Visual' })
+
+      --- auto update the highlight style on colorscheme change
+      vim.api.nvim_create_autocmd({ 'ColorScheme' }, {
+        pattern = { '*' },
+        callback = function(event)
+          vim.api.nvim_set_hl(0, 'IlluminatedWordText', { link = 'Visual' })
+          vim.api.nvim_set_hl(0, 'IlluminatedWordRead', { link = 'Visual' })
+          vim.api.nvim_set_hl(0, 'IlluminatedWordWrite', { link = 'Visual' })
+        end,
+      })
     end,
   },
 
@@ -551,6 +617,7 @@ return {
             ['textDocument/codeAction'] = function() end,
             ['textDocument/rename'] = function() end,
             ['codeAction/resolve'] = function() end,
+            -- ['textDocument/references'] = function() end,
             ['textDocument/hover'] = vim.lsp.with(hover, {
               border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
               title = ' |･ω･) ? ',
@@ -933,5 +1000,90 @@ return {
       require('kickstart.plugins.telescope-multigrep').setup()
       require('kickstart.plugins.telescope-codeaction').setup()
     end,
+  },
+
+  {
+    'Wansmer/symbol-usage.nvim',
+    event = 'BufReadPre', -- need run before LspAttach if you use nvim 0.9. On 0.10 use 'LspAttach'
+    config = function()
+      local function h(name)
+        return vim.api.nvim_get_hl(0, { name = name })
+      end
+
+      -- hl-groups can have any name
+      vim.api.nvim_set_hl(0, 'SymbolUsageRounding', { fg = h('CursorLine').bg, italic = true })
+      vim.api.nvim_set_hl(0, 'SymbolUsageContent', { bg = h('CursorLine').bg, fg = h('Comment').fg, italic = true })
+      vim.api.nvim_set_hl(0, 'SymbolUsageRef', { fg = h('Function').fg, bg = h('CursorLine').bg, italic = true })
+      vim.api.nvim_set_hl(0, 'SymbolUsageDef', { fg = h('Type').fg, bg = h('CursorLine').bg, italic = true })
+      vim.api.nvim_set_hl(0, 'SymbolUsageImpl', { fg = h('@keyword').fg, bg = h('CursorLine').bg, italic = true })
+
+      local function text_format(symbol)
+        local res = {}
+
+        local round_start = { '', 'SymbolUsageRounding' }
+        local round_end = { '', 'SymbolUsageRounding' }
+
+        -- Indicator that shows if there are any other symbols in the same line
+        local stacked_functions_content = symbol.stacked_count > 0 and ('+%s'):format(symbol.stacked_count) or ''
+
+        if symbol.references then
+          local usage = symbol.references <= 1 and 'usage' or 'usages'
+          local num = symbol.references == 0 and 'no' or symbol.references
+          table.insert(res, round_start)
+          table.insert(res, { '󰌹 ', 'SymbolUsageRef' })
+          table.insert(res, { ('%s %s'):format(num, usage), 'SymbolUsageContent' })
+          table.insert(res, round_end)
+        end
+
+        if symbol.definition then
+          if #res > 0 then
+            table.insert(res, { ' ', 'NonText' })
+          end
+          table.insert(res, round_start)
+          table.insert(res, { '󰳽 ', 'SymbolUsageDef' })
+          table.insert(res, { symbol.definition .. ' defs', 'SymbolUsageContent' })
+          table.insert(res, round_end)
+        end
+
+        if symbol.implementation then
+          if #res > 0 then
+            table.insert(res, { ' ', 'NonText' })
+          end
+          table.insert(res, round_start)
+          table.insert(res, { '󰡱 ', 'SymbolUsageImpl' })
+          table.insert(res, { symbol.implementation .. ' impls', 'SymbolUsageContent' })
+          table.insert(res, round_end)
+        end
+
+        if stacked_functions_content ~= '' then
+          if #res > 0 then
+            table.insert(res, { ' ', 'NonText' })
+          end
+          table.insert(res, round_start)
+          table.insert(res, { ' ', 'SymbolUsageImpl' })
+          table.insert(res, { stacked_functions_content, 'SymbolUsageContent' })
+          table.insert(res, round_end)
+        end
+
+        return res
+      end
+
+      require('symbol-usage').setup {
+        text_format = text_format,
+      }
+    end,
+  },
+
+  {
+    'ray-x/lsp_signature.nvim',
+    event = 'InsertEnter',
+    opts = {
+      bind = true,
+      handler_opts = {
+        border = 'rounded',
+      },
+    },
+    -- or use config
+    -- config = function(_, opts) require'lsp_signature'.setup({you options}) end
   },
 }

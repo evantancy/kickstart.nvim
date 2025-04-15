@@ -3,6 +3,7 @@
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.g.minipairs_disable = true
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
@@ -12,12 +13,7 @@ vim.g.have_nerd_font = true
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
--- Make line numbers default
-vim.opt.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
 vim.opt.relativenumber = true
-
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 vim.opt.errorbells = false -- Disable annoying sounds
@@ -38,6 +34,8 @@ end)
 vim.opt.smarttab = true -- Makes tabbing smarter, will use shiftwidths instead of tabstop in some cases
 vim.opt.smartindent = true
 vim.opt.autoindent = true -- Copy indent from current line when starting a new line
+-- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
+vim.opt.ignorecase = true
 vim.opt.smartcase = true -- Override the 'ignorecase' option if the search pattern contains upper case characters
 -- vim.opt.breakindent = true -- Wrapped lines will continue visually indented (same amount of space as the beginning of that line)
 vim.opt.expandtab = true -- Convert tabs to spaces
@@ -54,13 +52,8 @@ vim.cmd [[
   ]]
 vim.opt.syntax = 'enable' -- Enable syntax highlighting
 
--- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
-
 -- Keep signcolumn on by default
 vim.opt.signcolumn = 'yes'
--- vim.cmd [[set signcolumn=auto:4]]
 
 -- Decrease update time
 vim.opt.updatetime = 100
@@ -141,6 +134,7 @@ vim.keymap.set('n', '<leader>D', '"_D', { noremap = true })
 vim.keymap.set('n', '<leader>C', '"_C', { noremap = true })
 vim.keymap.set('n', '<leader>c', '"_c', { noremap = true })
 vim.keymap.set('n', '<leader>x', '"_x', { noremap = true })
+
 -- navigate TODO items
 vim.keymap.set('n', ']t', function()
   require('todo-comments').jump_next()

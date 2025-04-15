@@ -96,13 +96,16 @@ require('lazy').setup({
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
+    dependencies = {
+      { 'ellisonleao/gruvbox.nvim', priority = 1000, config = true, opts = ... },
+    },
     config = function()
       ---@diagnostic disable-next-line: missing-fields
       require('tokyonight').setup {
         -- your configuration comes here
         -- or leave it empty to use the default settings
         -- style = 'night', -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
-        transparent = false, -- Enable this to disable setting the background color
+        transparent = true, -- Enable this to disable setting the background color
         terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
         styles = {
           -- Style to be applied to different syntax groups
@@ -118,7 +121,8 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.o.background = 'dark'
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'gruvbox'
     end,
   },
 

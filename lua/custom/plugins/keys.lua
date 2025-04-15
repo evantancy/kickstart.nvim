@@ -9,7 +9,7 @@ return {
   --  event = 'VimEnter'
   --
   -- which loads which-key before all the UI elements are loaded. Events can be
-  -- normal autocommands events (`:help autocmd-events`).
+  -- normal autocommands events (`:help autocmd-events`)
   --
   -- Then, because we use the `opts` key (recommended), the configuration runs
   -- after the plugin has been loaded as `require(MODULE).setup(opts)`.

@@ -1,6 +1,5 @@
 return {
-
-  { -- Visualize undo trees
+  {
     'mbbill/undotree',
   },
 
@@ -15,9 +14,22 @@ return {
     },
     config = function()
       local dropbar_api = require 'dropbar.api'
+      local utils = require 'dropbar.utils'
       vim.keymap.set('n', '<Leader>;', dropbar_api.pick, { desc = 'Pick symbols in winbar' })
       vim.keymap.set('n', '[;', dropbar_api.goto_context_start, { desc = 'Go to start of current context' })
       vim.keymap.set('n', '];', dropbar_api.select_next_context, { desc = 'Select next context' })
+      local select_current = function()
+        local menu = utils.menu.get_current()
+        if not menu then
+          return
+        end
+        local cursor = vim.api.nvim_win_get_cursor(menu.win)
+        local component = menu.entries[cursor[1]]:first_clickable(cursor[2])
+        if component then
+          menu:click_on(component, nil, 1, 'l')
+        end
+      end
+      vim.keymap.set('n', '<C-y>', select_current, { desc = 'Select current context' })
     end,
   },
 
@@ -109,4 +121,20 @@ return {
       }
     end,
   },
+  --
+  -- {
+  --   'alexpasmantier/pymple.nvim',
+  --   enabled = false,
+  --   dependencies = {
+  --     'nvim-lua/plenary.nvim',
+  --     'MunifTanjim/nui.nvim',
+  --     -- optional (nicer ui)
+  --     'stevearc/dressing.nvim',
+  --     'nvim-tree/nvim-web-devicons',
+  --   },
+  --   build = ':PympleBuild',
+  --   config = function()
+  --     require('pymple').setup()
+  --   end,
+  -- },
 }
