@@ -98,6 +98,7 @@ require('lazy').setup({
     priority = 1000, -- Make sure to load this before all the other start plugins.
     dependencies = {
       { 'ellisonleao/gruvbox.nvim', priority = 1000, config = true, opts = ... },
+      { 'loctvl842/monokai-pro.nvim' },
     },
     config = function()
       ---@diagnostic disable-next-line: missing-fields
@@ -123,6 +124,7 @@ require('lazy').setup({
       vim.o.background = 'dark'
       vim.cmd.colorscheme 'tokyonight-night'
       -- vim.cmd.colorscheme 'gruvbox'
+      -- vim.cmd.colorscheme 'monokai-pro'
     end,
   },
 

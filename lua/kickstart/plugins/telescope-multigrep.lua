@@ -7,6 +7,7 @@ local conf = require('telescope.config').values
 
 local live_multigrep = function(opts)
   opts = opts or {}
+
   opts.cwd = opts.cwd or vim.uv.cwd()
   local finder = finders.new_async_job {
     command_generator = function(prompt)
@@ -19,8 +20,25 @@ local live_multigrep = function(opts)
 
       local args = { 'rg' }
       if pieces[1] then
-        table.insert(args, '-e')
-        table.insert(args, pieces[1])
+        -- table.insert(args, '-e')
+        -- table.insert(args, pieces[1])
+
+        -- NOTE: enables fuzzy when ...
+        -- Check if the first character is "~"
+        if pieces[1]:sub(1, 1) == '~' then
+          -- Remove the "~" character from the beginning of the search pattern
+          local search_pattern = pieces[1]:sub(2) -- Extract everything after the "~"
+          -- Convert the search pattern to fuzzy matching pattern
+          local fuzzy_pattern = search_pattern:gsub('.', function(c)
+            return '[^' .. c .. ']*' .. c
+          end)
+          table.insert(args, '-e')
+          table.insert(args, fuzzy_pattern)
+        else
+          -- Use the exact search pattern if "~" is not the first character
+          table.insert(args, '-e')
+          table.insert(args, pieces[1])
+        end
       end
 
       if pieces[2] then
@@ -50,7 +68,8 @@ local live_multigrep = function(opts)
       prompt_title = 'Live Multigrep',
       finder = finder,
       previewer = conf.grep_previewer(opts),
-      sorter = require('telescope.sorters').empty(),
+      -- sorter = require('telescope.sorters').empty(),
+      sorter = conf.generic_sorter(opts),
     })
     :find()
 end

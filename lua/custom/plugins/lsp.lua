@@ -1011,6 +1011,7 @@ return {
 
   {
     'Wansmer/symbol-usage.nvim',
+    enabled = true,
     event = 'BufReadPre', -- need run before LspAttach if you use nvim 0.9. On 0.10 use 'LspAttach'
     config = function()
       local function h(name)
@@ -1077,6 +1078,8 @@ return {
 
       require('symbol-usage').setup {
         text_format = text_format,
+        ---@type 'above'|'end_of_line'|'textwidth'|'signcolumn' `above` by default
+        vt_position = 'above',
       }
     end,
   },
