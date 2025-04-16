@@ -298,6 +298,34 @@ return {
   },
 
   {
+    'williamboman/mason.nvim',
+    init = function(_)
+      local pylsp = require('mason-registry').get_package 'python-lsp-server'
+      pylsp:on('install:success', function()
+        local function mason_package_path(package)
+          local path = vim.fn.resolve(vim.fn.stdpath 'data' .. '/mason/packages/' .. package)
+          return path
+        end
+
+        local path = mason_package_path 'python-lsp-server'
+        local command = path .. '/venv/bin/pip'
+        local args = {
+          'install',
+          'pylsp-rope',
+        }
+
+        require('plenary.job')
+          :new({
+            command = command,
+            args = args,
+            cwd = path,
+          })
+          :start()
+      end)
+    end,
+  },
+
+  {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -377,10 +405,10 @@ return {
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('<leader>sw', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Search [S]ymbols in [W]orkspace')
-          -- map('<leader>sw', function()
-          --   require('fzf-lua').lsp_live_workspace_symbols { winopts = { preview = { layout = 'vertical', vertical = 'up:60%' } } }
-          -- end, 'Search Symbols in Workspace')
+          -- map('<leader>sw', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Search [S]ymbols in [W]orkspace')
+          map('<leader>sw', function()
+            require('fzf-lua').lsp_live_workspace_symbols { winopts = { preview = { layout = 'vertical', vertical = 'up:60%' } } }
+          end, 'Search Symbols in Workspace')
 
           -- map('gs', vim.lsp.buf.signature_help, '[G]oto [S]ignature')
 
@@ -621,9 +649,9 @@ return {
             },
           },
           handlers = {
-            ['textDocument/codeAction'] = function() end,
-            ['textDocument/rename'] = function() end,
-            ['codeAction/resolve'] = function() end,
+            -- ['textDocument/codeAction'] = function() end,
+            -- ['textDocument/rename'] = function() end,
+            -- ['codeAction/resolve'] = function() end,
             -- ['textDocument/references'] = function() end,
             ['textDocument/hover'] = vim.lsp.with(hover, {
               border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
@@ -633,40 +661,74 @@ return {
             }),
           },
         },
-        basedpyright = {
-          -- use Ruff's import organizer
-          disableOrganizeImports = true,
-          filetypes = { 'python' },
+
+        pylsp = {
           settings = {
-            basedpyright = {
-              analysis = {
-                autoSearchPaths = true,
-                diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
-                useLibraryCodeForTypes = true,
-                diagnosticSeverityOverrides = {
-                  reportWildcardImportFromLibrary = 'error',
-                  reportUnusedImport = 'information',
-                  reportUnusedClass = 'information',
-                  reportUnusedFunction = 'warning',
-                  reportOptionalMemberAccess = 'error',
-                  reportUnknownVariableType = 'warning',
-                  reportUnusedCallResult = 'none',
+            pylsp = {
+              -- see https://github.com/python-lsp/python-lsp-server#configuration
+              plugins = {
+                flake8 = { enabled = false, ignore = { 'E501', 'E302', 'E303', 'W391', 'F401', 'E402', 'E265' } },
+                jedi_completion = { enabled = false },
+                jedi_definition = { enabled = false },
+                jedi_hover = { enabled = false },
+                jedi_references = { enabled = false },
+                jedi_signature_help = { enabled = false },
+                jedi_symbols = { enabled = false, all_scopes = false, include_import_symbols = false },
+                preload = { enabled = false, modules = { 'numpy', 'scipy' } },
+                mccabe = { enabled = false },
+                mypy = { enabled = false },
+                isort = { enabled = false },
+                spyder = { enabled = false },
+                memestra = { enabled = false },
+                -- FIXME: not working
+                pycodestyle = { enabled = false },
+                pyflakes = { enabled = false },
+                yapf = { enabled = false },
+                pylint = {
+                  enabled = false,
                 },
+                rope = { enabled = true },
+                rope_completion = { enabled = false, eager = false },
+                rope_autoimport = { enabled = true },
               },
             },
           },
-
-          handlers = {
-            ['textDocument/publishDiagnostics'] = function() end,
-            -- ['textDocument/rename'] = function() end,
-            ['textDocument/hover'] = vim.lsp.with(hover, {
-              border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
-              title = ' |･ω･) ? ',
-              max_width = 120,
-              zindex = 500,
-            }),
-          },
         },
+
+        -- basedpyright = {
+        --   -- use Ruff's import organizer
+        --   disableOrganizeImports = true,
+        --   filetypes = { 'python' },
+        --   settings = {
+        --     basedpyright = {
+        --       analysis = {
+        --         autoSearchPaths = true,
+        --         diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
+        --         useLibraryCodeForTypes = true,
+        --         diagnosticSeverityOverrides = {
+        --           reportWildcardImportFromLibrary = 'error',
+        --           reportUnusedImport = 'information',
+        --           reportUnusedClass = 'information',
+        --           reportUnusedFunction = 'warning',
+        --           reportOptionalMemberAccess = 'error',
+        --           reportUnknownVariableType = 'warning',
+        --           reportUnusedCallResult = 'none',
+        --         },
+        --       },
+        --     },
+        --   },
+        --
+        --   handlers = {
+        --     ['textDocument/publishDiagnostics'] = function() end,
+        --     -- ['textDocument/rename'] = function() end,
+        --     ['textDocument/hover'] = vim.lsp.with(hover, {
+        --       border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
+        --       title = ' |･ω･) ? ',
+        --       max_width = 120,
+        --       zindex = 500,
+        --     }),
+        --   },
+        -- },
 
         ruff = {
           -- NOTE: disable LSP disagnostics for ruff
@@ -769,6 +831,23 @@ return {
       require('mason-lspconfig').setup {
         ensure_installed = {},
         automatic_installation = false,
+        on_attach = function(client, bufnr)
+          if client.name == 'pylsp' then
+            client.server_.documentFormattingProvider = false
+            client.server_.documentRangeFormattingProvider = false
+          end
+          if client.name == 'pyright' then
+            client.server_.renameProvider = false -- rope is ok
+            client.server_.hoverProvider = false -- pylsp includes also docstrings
+            client.server_.signatureHelpProvider = false -- pyright typing of signature is weird
+            client.server_.definitionProvider = false -- pyright does not follow imports correctly
+            client.server_.referencesProvider = false -- pylsp does it
+            client.server_.completionProvider = {
+              resolveProvider = true,
+              triggerCharacters = { '.' },
+            }
+          end
+        end,
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
