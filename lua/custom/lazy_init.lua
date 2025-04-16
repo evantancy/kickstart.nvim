@@ -105,7 +105,7 @@ require('lazy').setup({
         -- your configuration comes here
         -- or leave it empty to use the default settings
         -- style = 'night', -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
-        transparent = true, -- Enable this to disable setting the background color
+        transparent = false, -- Enable this to disable setting the background color
         terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
         styles = {
           -- Style to be applied to different syntax groups
@@ -121,8 +121,8 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.o.background = 'dark'
-      -- vim.cmd.colorscheme 'tokyonight-night'
-      vim.cmd.colorscheme 'gruvbox'
+      vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'gruvbox'
     end,
   },
 
@@ -189,7 +189,7 @@ require('lazy').setup({
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
       -- NOTE: this is quite different to nvim-surround
-      require('mini.surround').setup()
+      -- require('mini.surround').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
