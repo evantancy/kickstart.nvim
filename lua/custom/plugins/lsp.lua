@@ -417,6 +417,13 @@ return {
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
           if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
+            -- NOTE: define custom LSP highlights here
+            vim.api.nvim_set_hl(0, 'LspReferenceText', { bg = '#3a3a3a' })
+            vim.api.nvim_set_hl(0, 'LspReferenceRead', { bg = '#264f78' })
+            vim.api.nvim_set_hl(0, 'LspReferenceWrite', { bg = '#4b1818' })
+            vim.api.nvim_set_hl(0, 'LspCodeLens', { fg = '#999999', italic = true })
+            vim.api.nvim_set_hl(0, 'LspSignatureActiveParameter', { bold = true, underline = true })
+
             local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
