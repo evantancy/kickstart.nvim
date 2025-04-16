@@ -128,7 +128,7 @@ local code_actions_picker = function(opts)
 end
 
 M.setup = function()
-  vim.keymap.set('n', '<leader>ca', code_actions_picker, { desc = 'Code actions' })
+  vim.keymap.set({ 'n', 'x' }, '<leader>ca', code_actions_picker, { desc = 'Code actions' })
 end
 
 return M
