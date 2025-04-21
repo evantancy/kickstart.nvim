@@ -3,6 +3,8 @@
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+
+-- mini.nvim
 vim.g.minipairs_disable = true
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
@@ -13,14 +15,14 @@ vim.g.have_nerd_font = true
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
+vim.opt.number = true
 vim.opt.relativenumber = true
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
-vim.opt.errorbells = false -- Disable annoying sounds
-vim.opt.iskeyword = vim.opt.iskeyword + '-' -- Treat dash separated words as a word text object
-
--- Don't show the mode, since it's already in the status line
-vim.opt.showmode = false
+-- Disable annoying sounds
+vim.opt.errorbells = false
+-- Treat dash separated words as a word text object
+vim.opt.iskeyword = vim.opt.iskeyword + '-'
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -34,8 +36,7 @@ end)
 vim.opt.smarttab = true -- Makes tabbing smarter, will use shiftwidths instead of tabstop in some cases
 vim.opt.smartindent = true
 vim.opt.autoindent = true -- Copy indent from current line when starting a new line
--- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-vim.opt.ignorecase = true
+vim.opt.ignorecase = true -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.smartcase = true -- Override the 'ignorecase' option if the search pattern contains upper case characters
 -- vim.opt.breakindent = true -- Wrapped lines will continue visually indented (same amount of space as the beginning of that line)
 vim.opt.expandtab = true -- Convert tabs to spaces

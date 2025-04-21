@@ -21,11 +21,12 @@ local live_multigrep = function(opts)
       local args = { 'rg' }
       -- NOTE: this works normally
       if pieces[1] then
-        -- Convert the search pattern to fuzzy matching pattern
-        local fuzzy_pattern = pieces[1]:gsub('.', function(c)
-          return '[^' .. c .. ']*' .. c
-        end)
+        -- -- Convert the search pattern to fuzzy matching pattern
+        -- local fuzzy_pattern = pieces[1]:gsub('.', function(c)
+        --   return '[^' .. c .. ']*' .. c
+        -- end)
         table.insert(args, '-e')
+        table.insert(args, pieces[1])
         table.insert(args, fuzzy_pattern)
       end
 

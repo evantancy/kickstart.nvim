@@ -65,45 +65,11 @@ return {
   },
 
   {
-    'folke/snacks.nvim',
-    priority = 1000,
-    lazy = false,
-    ---@type snacks.Config
-    opts = {
-      -- your configuration comes here
-      -- or leave it empty to use the default settings
-      -- refer to the configuration section below
-      bigfile = { enabled = true },
-      dashboard = { enabled = false },
-      explorer = { enabled = false },
-      indent = { enabled = false },
-      input = { enabled = true },
-      picker = { enabled = true },
-      notifier = { enabled = true },
-      quickfile = { enabled = false },
-      scope = { enabled = true },
-      scroll = { enabled = true },
-      statuscolumn = { enabled = true },
-      words = { enabled = false },
-      rename = { enabled = true },
-    },
-    config = function()
-      vim.api.nvim_create_autocmd('User', {
-        pattern = 'OilActionsPost',
-        callback = function(event)
-          if event.data.actions.type == 'move' then
-            Snacks.rename.on_rename_file(event.data.actions.src_url, event.data.actions.dest_url)
-          end
-        end,
-      })
-    end,
-  },
-
-  {
     'stevearc/oil.nvim',
     -- Optional dependencies
-    -- dependencies = { { 'echasnovski/mini.icons', opts = {} } },
-    dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if you prefer nvim-web-devicons
+    dependencies = {
+      { 'nvim-tree/nvim-web-devicons' },
+    }, -- use if you prefer nvim-web-devicons
     -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
     lazy = false,
     config = function()
@@ -111,7 +77,10 @@ return {
       vim.keymap.set('n', '-', '<CMD>Oil --float<CR>', { desc = 'Open parent directory' })
 
       require('oil').setup {
-
+        float = {
+          max_width = 0.5,
+          max_height = 0.5,
+        },
         lsp_file_methods = {
           -- Enable or disable LSP file operations
           enabled = true,
@@ -119,9 +88,9 @@ return {
           timeout_ms = 10000,
           -- Set to true to autosave buffers that are updated with LSP willRenameFiles
           -- Set to "unmodified" to only save unmodified buffers
-          autosave_changes = false,
+          autosave_changes = true,
         },
-        skip_confirm_for_simple_edits = false,
+        skip_confirm_for_simple_edits = true,
         -- Set to true to watch the filesystem for changes and reload oil
         watch_for_changes = true,
 
@@ -152,25 +121,9 @@ return {
 
           -- NOTE: user defined keybinds
           ['<C-y>'] = 'actions.select',
+          ['<esc>'] = { 'actions.close', mode = 'n' },
         },
       }
-    end,
-  },
-
-  -- FIXME: this doesn't work when refactoring
-  {
-    'alexpasmantier/pymple.nvim',
-    enabled = false,
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'MunifTanjim/nui.nvim',
-      -- optional (nicer ui)
-      'stevearc/dressing.nvim',
-      'nvim-tree/nvim-web-devicons',
-    },
-    build = ':PympleBuild',
-    config = function()
-      require('pymple').setup()
     end,
   },
 }

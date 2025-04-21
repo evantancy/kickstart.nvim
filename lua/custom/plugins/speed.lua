@@ -10,6 +10,7 @@ return {
       'tpope/vim-repeat',
     },
     config = function()
+      -- use 'gs' for bidirectional leap
       vim.keymap.set({ 'n', 'x' }, 'gs', '<Plug>(leap)')
       vim.keymap.set('o', 'gs', '<Plug>(leap-forward)')
       -- vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
@@ -21,14 +22,12 @@ return {
   },
 
   {
-    -- Harpoon
     'ThePrimeagen/harpoon',
     branch = 'harpoon2',
     dependencies = { 'nvim-lua/plenary.nvim' },
     config = function()
       local harpoon = require 'harpoon'
       harpoon.setup {}
-      --
       -- basic telescope configuration
       local conf = require('telescope.config').values
       local function toggle_telescope(harpoon_files)
@@ -49,18 +48,15 @@ return {
           :find()
       end
 
-      -- vim.keymap.set('n', '<C-e>', function()
-      --   toggle_telescope(harpoon:list())
-      -- end, { desc = 'Open harpoon window' })
-      vim.keymap.set('n', '<leader>a', function()
+      vim.keymap.set('n', '<leader>ha', function()
         harpoon:list():add()
-      end, { desc = 'harpoon [a]ppend' })
+      end, { desc = 'harpoon append' })
       -- vim.keymap.set('n', '<leader>A', function()
       --   harpoon:list():prepend()
       -- end, { desc = 'harpoon prepend' })
       vim.keymap.set('n', '<C-e>', function()
         harpoon.ui:toggle_quick_menu(harpoon:list())
-      end, { desc = '[h]arpoon [l]ist' })
+      end, { desc = 'harpoon list' })
       vim.keymap.set('n', '<A-1>', function()
         harpoon:list():select(1)
       end)
@@ -77,10 +73,10 @@ return {
         harpoon:list():select(5)
       end)
       -- Toggle previous & next buffers stored within Harpoon list
-      vim.keymap.set('n', '<A-p>', function()
+      vim.keymap.set('n', '<A-k>', function()
         harpoon:list():prev()
       end)
-      vim.keymap.set('n', '<A-n>', function()
+      vim.keymap.set('n', '<A-j>', function()
         harpoon:list():next()
       end)
     end,

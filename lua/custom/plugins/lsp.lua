@@ -1,5 +1,4 @@
 vim.lsp.inlay_hint.enable(true)
-vim.g.inlay_hints_visible = true
 
 --- HACK: Override `vim.lsp.util.stylize_markdown` to use Treesitter.
 ---@param bufnr integer
@@ -33,6 +32,12 @@ end, { desc = 'Goto previous error' })
 vim.keymap.set('n', ']e', function()
   vim.diagnostic.goto_next { severity = vim.diagnostic.severity.ERROR }
 end, { desc = 'Goto next error' })
+vim.keymap.set('n', '[w', function()
+  vim.diagnostic.goto_prev { severity = vim.diagnostic.severity.WARN }
+end, { desc = 'Goto previous warning' })
+vim.keymap.set('n', ']w', function()
+  vim.diagnostic.goto_next { severity = vim.diagnostic.severity.WARN }
+end, { desc = 'Goto next warning' })
 
 return {
   {
@@ -43,16 +48,15 @@ return {
 
   {
     -- Plug 'heavenshell/vim-pydocstring', { 'do': 'make install', 'for': 'python' }
-    -- NOTE: this is the only plugin that works well for python
-    -- tried vim-doge and neogen as well
+    -- NOTE: this is the only plugin that works well for python, tried vim-doge and neogen as well
     'heavenshell/vim-pydocstring',
     build = 'make install',
     config = function()
       vim.g.pydocstring_formatter = 'google' -- 'google', 'numpy', 'sphinx'
-      vim.cmd [[nmap <silent> <leader>dg <Plug>(pydocstring)]]
       vim.keymap.set('n', '<leader>dg', '<Plug>(pydocstring)', { desc = 'docstring generate' })
     end,
   },
+
   {
     'ThePrimeagen/refactoring.nvim',
     dependencies = {
@@ -96,7 +100,7 @@ return {
 
   {
     'chrisgrieser/nvim-puppeteer',
-    lazy = false, -- plugin lazy-loads itself. Can also load on filetypes.
+    lazy = false,
   },
 
   {
@@ -104,16 +108,24 @@ return {
     opts = {
       warn_no_results = false,
       open_no_results = true,
+      win = {
+        wo = {
+          -- false diagnostics text wrapping
+          wrap = false,
+        },
+      },
 
       modes = {
         ---@class trouble.Mode: trouble.Config,trouble.Section.spec
         diagnostics_preview = {
           mode = 'diagnostics',
+
+          ---@type trouble.Window.opts
           preview = {
             type = 'split',
             relative = 'win',
             position = 'right',
-            size = 0.3,
+            size = 0.4,
           },
           filter = {
             any = {
@@ -182,105 +194,6 @@ return {
         desc = 'Quickfix List (Trouble)',
       },
     },
-  },
-
-  -- {
-  --   'stevearc/quicker.nvim',
-  --   event = 'FileType qf',
-  --   ---@module "quicker"
-  --   ---@type quicker.SetupOptions
-  --   config = function()
-  --     require('quicker').setup {
-  --       follow = {
-  --         -- When quickfix window is open, scroll to closest item to the cursor
-  --         enabled = true,
-  --       },
-  --     }
-  --   end,
-  -- },
-
-  {
-    'RRethy/vim-illuminate',
-    enabled = false,
-    config = function()
-      vim.cmd [[ hi def IlluminatedWordText gui=underline cterm=underline ]]
-      vim.cmd [[ hi def IlluminatedWordRead gui=underline cterm=underline ]]
-      vim.cmd [[ hi def IlluminatedWordWrite gui=underline cterm=underline ]]
-      -- default configuration
-      require('illuminate').configure {
-        -- providers: provider used to get references in the buffer, ordered by priority
-        providers = {
-          'lsp',
-          'treesitter',
-          'regex',
-        },
-        -- delay: delay in milliseconds
-        delay = 100,
-        -- filetype_overrides: filetype specific overrides.
-        -- The keys are strings to represent the filetype while the values are tables that
-        -- supports the same keys passed to .configure except for filetypes_denylist and filetypes_allowlist
-        filetype_overrides = {},
-        -- filetypes_denylist: filetypes to not illuminate, this overrides filetypes_allowlist
-        filetypes_denylist = {
-          'dirbuf',
-          'dirvish',
-          'fugitive',
-          'TelescopePrompt',
-          'Avante',
-          'codecompanion',
-        },
-        -- filetypes_allowlist: filetypes to illuminate, this is overridden by filetypes_denylist
-        -- You must set filetypes_denylist = {} to override the defaults to allow filetypes_allowlist to take effect
-        filetypes_allowlist = {},
-        -- modes_denylist: modes to not illuminate, this overrides modes_allowlist
-        -- See `:help mode()` for possible values
-        modes_denylist = {},
-        -- modes_allowlist: modes to illuminate, this is overridden by modes_denylist
-        -- See `:help mode()` for possible values
-        modes_allowlist = {},
-        -- providers_regex_syntax_denylist: syntax to not illuminate, this overrides providers_regex_syntax_allowlist
-        -- Only applies to the 'regex' provider
-        -- Use :echom synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')
-        providers_regex_syntax_denylist = {},
-        -- providers_regex_syntax_allowlist: syntax to illuminate, this is overridden by providers_regex_syntax_denylist
-        -- Only applies to the 'regex' provider
-        -- Use :echom synIDattr(synIDtrans(synID(line('.'), col('.'), 1)), 'name')
-        providers_regex_syntax_allowlist = {},
-        -- under_cursor: whether or not to illuminate under the cursor
-        under_cursor = true,
-        -- large_file_cutoff: number of lines at which to use large_file_config
-        -- The `under_cursor` option is disabled when this cutoff is hit
-        large_file_cutoff = nil,
-        -- large_file_config: config to use for large files (based on large_file_cutoff).
-        -- Supports the same keys passed to .configure
-        -- If nil, vim-illuminate will be disabled for large files.
-        large_file_overrides = nil,
-        -- min_count_to_highlight: minimum number of matches required to perform highlighting
-        min_count_to_highlight = 1,
-        -- should_enable: a callback that overrides all other settings to
-        -- enable/disable illumination. This will be called a lot so don't do
-        -- anything expensive in it.
-        should_enable = function(bufnr)
-          return true
-        end,
-        -- case_insensitive_regex: sets regex case sensitivity
-        case_insensitive_regex = false,
-      }
-      -- change the highlight style
-      vim.api.nvim_set_hl(0, 'IlluminatedWordText', { link = 'Visual' })
-      vim.api.nvim_set_hl(0, 'IlluminatedWordRead', { link = 'Visual' })
-      vim.api.nvim_set_hl(0, 'IlluminatedWordWrite', { link = 'Visual' })
-
-      --- auto update the highlight style on colorscheme change
-      vim.api.nvim_create_autocmd({ 'ColorScheme' }, {
-        pattern = { '*' },
-        callback = function(event)
-          vim.api.nvim_set_hl(0, 'IlluminatedWordText', { link = 'Visual' })
-          vim.api.nvim_set_hl(0, 'IlluminatedWordRead', { link = 'Visual' })
-          vim.api.nvim_set_hl(0, 'IlluminatedWordWrite', { link = 'Visual' })
-        end,
-      })
-    end,
   },
 
   -- LSP Plugins
@@ -445,7 +358,7 @@ return {
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
           if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
-            -- NOTE: define custom LSP highlights here
+            -- NOTE: define custom LSP highlights here, do not do this anywhere else
             vim.api.nvim_set_hl(0, 'LspReferenceText', { bg = '#3a3a3a' })
             vim.api.nvim_set_hl(0, 'LspReferenceRead', { bg = '#264f78' })
             vim.api.nvim_set_hl(0, 'LspReferenceWrite', { bg = '#4b1818' })
@@ -883,10 +796,9 @@ return {
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
-
+      { 'nvim-telescope/telescope-frecency.nvim' },
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
-      -- { 'nvim-telescope/telescope-frecency.nvim' },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -1022,13 +934,32 @@ return {
           -- the default case_mode is "smart_case"
           case_mode = 'smart_case', -- or "ignore_case" or "respect_case"
         },
+        frecency = {
+          show_scores = true, -- Default: false
+          -- If `true`, it shows confirmation dialog before any entries are removed from the DB
+          -- If you want not to be bothered with such things and to remove stale results silently
+          -- set db_safe_mode=false and auto_validate=true
+          --
+          -- This fixes an issue I had in which I couldn't close the floating
+          -- window because I couldn't focus it
+          -- db_safe_mode = false, -- Default: true
+
+          -- If `true`, it removes stale entries count over than db_validate_threshold
+          auto_validate = true, -- Default: true
+          -- It will remove entries when stale ones exist more than this count
+          db_validate_threshold = 10, -- Default: 10
+          -- Show the path of the active filter before file paths.
+          -- So if I'm in the `dotfiles-latest` directory it will show me that
+          -- before the name of the file
+          show_filter_column = true, -- Default: true
+        },
       }
 
       -- Enable Telescope extensions if they are installed
       require('telescope').load_extension 'fzf'
       require('telescope').load_extension 'ui-select'
       require('telescope').load_extension 'todo-comments'
-      -- pcall(require('telescope').load_extension, 'frecency')
+      require('telescope').load_extension 'frecency'
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
@@ -1098,6 +1029,7 @@ return {
         return vim.api.nvim_get_hl(0, { name = name })
       end
 
+      -- NOTE: do not shift this anywhere else
       -- hl-groups can have any name
       vim.api.nvim_set_hl(0, 'SymbolUsageRounding', { fg = h('CursorLine').bg, italic = true })
       vim.api.nvim_set_hl(0, 'SymbolUsageContent', { bg = h('CursorLine').bg, fg = h('Comment').fg, italic = true })

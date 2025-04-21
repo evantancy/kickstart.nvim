@@ -6,6 +6,8 @@ vim.g.bigfile_size = 1024 * 1024 * 1.5 -- 1.5 MB
 
 vim.filetype.add {
   pattern = {
+    ['tsconfig*.json'] = 'jsonc',
+    ['.*/%.vscode/.*%.json'] = 'jsonc',
     ['.*'] = {
       function(path, buf)
         return vim.bo[buf].filetype ~= 'bigfile' and path and vim.fn.getfsize(path) > vim.g.bigfile_size and 'bigfile' or nil

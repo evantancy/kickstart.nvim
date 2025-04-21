@@ -7,18 +7,6 @@ return {
       require('copilot').setup {
         panel = {
           enabled = false,
-          auto_refresh = false,
-          keymap = {
-            jump_prev = '[[',
-            jump_next = ']]',
-            accept = '<CR>',
-            refresh = 'gr',
-            open = '<M-CR>',
-          },
-          layout = {
-            position = 'bottom', -- | top | left | right | horizontal | vertical
-            ratio = 0.4,
-          },
         },
         suggestion = {
           enabled = true,
@@ -83,12 +71,12 @@ return {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
       --- The below dependencies are optional,
-      'echasnovski/mini.pick', -- for file_selector provider mini.pick
+      -- 'echasnovski/mini.pick', -- for file_selector provider mini.pick
       'nvim-telescope/telescope.nvim', -- for file_selector provider telescope
       'hrsh7th/nvim-cmp', -- autocompletion for avante commands and mentions
       'ibhagwan/fzf-lua', -- for file_selector provider fzf
       'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
-      'zbirenbaum/copilot.lua', -- for providers='copilot'
+      -- 'zbirenbaum/copilot.lua', -- for providers='copilot'
       {
         -- support for image pasting
         'HakonHarnes/img-clip.nvim',
@@ -115,38 +103,5 @@ return {
         ft = { 'markdown', 'Avante' },
       },
     },
-  },
-
-  {
-    'olimorris/codecompanion.nvim',
-    enabled = false,
-    dependencies = {
-      { 'nvim-lua/plenary.nvim' },
-      { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' },
-      { 'hrsh7th/nvim-cmp' },
-    },
-    config = function()
-      require('codecompanion').setup {
-        adapters = {
-          opts = {
-            show_defaults = true,
-          },
-          openrouter_claude = function()
-            return require('codecompanion.adapters').extend('openai_compatible', {
-              env = {
-                url = 'https://openrouter.ai/api',
-                api_key = 'cmd: EDITOR=cat sops -d ~/.openrouter-api-key.enc 2>/dev/null',
-                chat_url = '/v1/chat/completions',
-              },
-              schema = {
-                model = {
-                  default = 'anthropic/claude-3.7-sonnet',
-                },
-              },
-            })
-          end,
-        },
-      }
-    end,
   },
 }

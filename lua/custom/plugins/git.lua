@@ -69,6 +69,9 @@ return {
         },
         callbacks = {
           ['github.com'] = require('gitlinker.hosts').get_github_type_url,
+          ['gh-work1'] = require('gitlinker.hosts').get_github_type_url,
+          ['gh-work2'] = require('gitlinker.hosts').get_github_type_url,
+          ['gh-work3'] = require('gitlinker.hosts').get_github_type_url,
           ['gitlab.com'] = require('gitlinker.hosts').get_gitlab_type_url,
           ['try.gitea.io'] = require('gitlinker.hosts').get_gitea_type_url,
           ['codeberg.org'] = require('gitlinker.hosts').get_gitea_type_url,
