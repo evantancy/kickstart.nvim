@@ -1,17 +1,28 @@
+local blacklist = {
+  '.dotfiles',
+  'dotfiles',
+  'nvim',
+}
+
+local is_blacklisted = function(opts)
+  return vim.tbl_contains(blacklist, opts.workspace)
+end
+local git_branch = vim.fn.system('git branch --show-current'):gsub('\n', '')
+
 return {
   {
     'vyfor/cord.nvim',
-    enabled = true,
+    enabled = false,
     config = function()
       local quotes = {
-        'GTA VI came out before my Rust program finished compiling. ⏳',
+        -- 'GTA VI came out before my Rust program finished compiling. ⏳',
         'When your code works on the first try. 😱',
         'It’s not a bug, it’s a feature. 🐛✨',
         'I don’t always test my code, but when I do, I do it in production. 💥',
         'My code works, I have no idea why. 🤷‍♂️',
         'Hello from the other side... of a merge conflict. 🔀',
         'If it works, don’t touch it. 🛑',
-        'May your code never compile on the first try. 🤞',
+        -- 'May your code never compile on the first try. 🤞',
       }
       require('cord').setup {
         enabled = true,
@@ -19,7 +30,7 @@ return {
         editor = {
           client = 'neovim',
           tooltip = 'Entering monk mode',
-          icon = require('cord.api.icon').get 'shinto_shrine',
+          icon = '⛩️',
         },
         display = {
           theme = 'default',
@@ -54,6 +65,9 @@ return {
           editing = function(opts)
             return 'Editing ' .. opts.filename
           end,
+          -- editing = function(opts)
+          --   return string.format('Editing %s - on branch %s', opts.filename, opts.git_status)
+          -- end,
           file_browser = function(opts)
             return 'Browsing files in ' .. opts.name
           end,
@@ -99,17 +113,30 @@ return {
           },
         },
         assets = nil,
-        variables = nil,
+
+        variables = {
+          git_status = function(opts)
+            return git_branch()
+          end,
+        },
+
         hooks = {
           ready = nil,
           shutdown = nil,
           pre_activity = nil,
           post_activity = function(_, activity)
-            activity.details = quotes[math.random(#quotes)]
+            -- activity.details = quotes[math.random(#quotes)]
           end,
           idle_enter = nil,
           idle_leave = nil,
-          workspace_change = nil,
+          workspace_change = function(opts)
+            if is_blacklisted(opts) then
+              opts.manager:hide()
+            else
+              opts.manager:resume()
+              git_branch = vim.fn.system('git branch --show-current'):gsub('\n', '')
+            end
+          end,
         },
         plugins = nil,
         advanced = {

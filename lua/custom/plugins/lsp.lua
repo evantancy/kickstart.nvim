@@ -631,6 +631,7 @@ return {
         -- use basedpyright for inlay hints + better code actions
         -- use ruff for formatting
         -- FIXME: both pyright and basedpyright tryna rename symbol at the same time
+
         pyright = {
           -- use Ruff's import organizer
           disableOrganizeImports = true,
@@ -643,7 +644,7 @@ return {
                 autoSearchPaths = true,
                 diagnosticMode = 'workspace', -- 'workspace' | 'openFilesOnly'
                 useLibraryCodeForTypes = true,
-                typeCheckingMode = 'basic',
+                typeCheckingMode = 'strict',
                 autoImportCompletions = true,
               },
             },
@@ -689,7 +690,7 @@ return {
                 },
                 rope = { enabled = true },
                 rope_completion = { enabled = false, eager = false },
-                rope_autoimport = { enabled = true },
+                rope_autoimport = { enabled = false },
               },
             },
           },
@@ -833,16 +834,16 @@ return {
         automatic_installation = false,
         on_attach = function(client, bufnr)
           if client.name == 'pylsp' then
-            client.server_.documentFormattingProvider = false
-            client.server_.documentRangeFormattingProvider = false
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
           end
           if client.name == 'pyright' then
-            client.server_.renameProvider = false -- rope is ok
-            client.server_.hoverProvider = false -- pylsp includes also docstrings
-            client.server_.signatureHelpProvider = false -- pyright typing of signature is weird
-            client.server_.definitionProvider = false -- pyright does not follow imports correctly
-            client.server_.referencesProvider = false -- pylsp does it
-            client.server_.completionProvider = {
+            client.server_capabilities.renameProvider = false -- rope is ok
+            client.server_capabilities.hoverProvider = false -- pylsp includes also docstrings
+            client.server_capabilities.signatureHelpProvider = false -- pyright typing of signature is weird
+            client.server_capabilities.definitionProvider = false -- pyright does not follow imports correctly
+            client.server_capabilities.referencesProvider = false -- pylsp does it
+            client.server_capabilities.completionProvider = {
               resolveProvider = true,
               triggerCharacters = { '.' },
             }
@@ -1045,7 +1046,7 @@ return {
 
       vim.keymap.set('n', '<leader><C-e>', builtin.command_history, { desc = 'Open command history in Telescope' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
-      vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
+      -- vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
 
       -- NOTE: disabled in favor of custom buffer delete funcs
       vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[S]each open [B]uffers' })

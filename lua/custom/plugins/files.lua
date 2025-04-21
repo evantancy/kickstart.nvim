@@ -65,6 +65,41 @@ return {
   },
 
   {
+    'folke/snacks.nvim',
+    priority = 1000,
+    lazy = false,
+    ---@type snacks.Config
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+      bigfile = { enabled = true },
+      dashboard = { enabled = false },
+      explorer = { enabled = false },
+      indent = { enabled = false },
+      input = { enabled = true },
+      picker = { enabled = true },
+      notifier = { enabled = true },
+      quickfile = { enabled = false },
+      scope = { enabled = true },
+      scroll = { enabled = true },
+      statuscolumn = { enabled = true },
+      words = { enabled = false },
+      rename = { enabled = true },
+    },
+    config = function()
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'OilActionsPost',
+        callback = function(event)
+          if event.data.actions.type == 'move' then
+            Snacks.rename.on_rename_file(event.data.actions.src_url, event.data.actions.dest_url)
+          end
+        end,
+      })
+    end,
+  },
+
+  {
     'stevearc/oil.nvim',
     -- Optional dependencies
     -- dependencies = { { 'echasnovski/mini.icons', opts = {} } },
@@ -84,11 +119,11 @@ return {
           timeout_ms = 10000,
           -- Set to true to autosave buffers that are updated with LSP willRenameFiles
           -- Set to "unmodified" to only save unmodified buffers
-          autosave_changes = true,
+          autosave_changes = false,
         },
-        skip_confirm_for_simple_edits = true,
+        skip_confirm_for_simple_edits = false,
         -- Set to true to watch the filesystem for changes and reload oil
-        watch_for_changes = false,
+        watch_for_changes = true,
 
         -- Keymaps in oil buffer. Can be any value that `vim.keymap.set` accepts OR a table of keymap
         -- options with a `callback` (e.g. { callback = function() ... end, desc = "", mode = "n" })
@@ -121,20 +156,21 @@ return {
       }
     end,
   },
-  --
-  -- {
-  --   'alexpasmantier/pymple.nvim',
-  --   enabled = false,
-  --   dependencies = {
-  --     'nvim-lua/plenary.nvim',
-  --     'MunifTanjim/nui.nvim',
-  --     -- optional (nicer ui)
-  --     'stevearc/dressing.nvim',
-  --     'nvim-tree/nvim-web-devicons',
-  --   },
-  --   build = ':PympleBuild',
-  --   config = function()
-  --     require('pymple').setup()
-  --   end,
-  -- },
+
+  -- FIXME: this doesn't work when refactoring
+  {
+    'alexpasmantier/pymple.nvim',
+    enabled = false,
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+      -- optional (nicer ui)
+      'stevearc/dressing.nvim',
+      'nvim-tree/nvim-web-devicons',
+    },
+    build = ':PympleBuild',
+    config = function()
+      require('pymple').setup()
+    end,
+  },
 }
