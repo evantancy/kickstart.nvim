@@ -47,7 +47,7 @@ return {
         { '<leader>c', group = 'Code', mode = { 'n', 'x' } },
         { '<leader>d', group = 'Document' },
         { '<leader>r', group = 'Rename' },
-        { '<leader>s', group = 'Search' },
+        { '<leader>f', group = 'Find' },
         { '<leader>w', group = 'Workspace' },
         { '<leader>t', group = 'Toggle' },
         { '<leader>h', group = 'Git Hunk', mode = { 'n', 'v' } },
