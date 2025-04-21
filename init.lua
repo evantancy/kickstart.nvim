@@ -12,8 +12,8 @@ end
 
 source_env_vars()
 
-require 'custom.settings'
-require 'custom.autocmd'
-require 'custom.bigfile'
-require 'custom.lazy_init'
-require 'custom.commands'
+require 'settings'
+require 'autocmd'
+require 'filetype'
+require 'commands'
+require 'lazy_init'
