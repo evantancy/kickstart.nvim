@@ -15,19 +15,32 @@ return {
       cwd_prompt = false,
       path_shorten = true
     },
-
+    grep = {
+        rg_glob_fn = function(query, opts)
+            local regex, flags = query:match(string.format('^(.*)%s(.*)$', opts.glob_separator))
+            -- Return the original query if there's no separator.
+            return (regex or query), flags
+        end,
+        prompt            = 'Rg❯ ',
+        input_prompt      = 'Grep For❯ ',
+        multiprocess      = true,           -- run command in a separate process
+        git_icons         = false,          -- show git icons?
+        file_icons        = true,           -- show file icons (true|"devicons"|"mini")?
+        color_icons       = true,           -- colorize file|git icons
     },
+},
+
     config = function(_, opts)
       local fzf = require("fzf-lua")
       -- fzf.setup({'fzf-native', opts})
       -- Create a new config table with "fzf-native" as the first element
       local config = {"fzf-native"}
-      
+
       -- Copy all options from opts into the config table
       for k, v in pairs(opts) do
         config[k] = v
       end
-      
+
       -- Pass the combined config to setup
       fzf.setup(config)
       fzf.register_ui_select()

@@ -4,6 +4,7 @@ return {
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     opts = {
+    preset = 'helix',
       delay = 25,
       icons = {
         -- set icon mappings to true if you have a Nerd Font
