@@ -32,7 +32,8 @@ require('lazy').setup({
   -- keys can be used to configure plugin behavior/loading/etc.
   --
   -- Use `opts = {}` to force a plugin to be loaded.
-  --
+
+  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can specify dependencies.
   --
@@ -194,6 +195,7 @@ require('lazy').setup({
           'json',
           'regex',
           'yaml',
+          'typescript',
         },
         -- Autoinstall languages that are not installed
         auto_install = true,

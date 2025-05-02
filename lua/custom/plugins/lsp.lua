@@ -685,8 +685,7 @@ return {
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
-        --
+        ts_ls = {},
 
         lua_ls = {
           -- cmd = {...},
@@ -720,6 +719,7 @@ return {
         'stylua', -- Used to format Lua code
         'prismals',
         'shellcheck',
+        'prettier',
       })
 
       -- Function to check if "ruff" command is available
