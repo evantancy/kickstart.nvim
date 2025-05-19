@@ -53,3 +53,5 @@ require('lazy').setup {
 }
 
 require 'etcy.autocmd'
+require 'etcy.opt'
+require 'etcy.set'

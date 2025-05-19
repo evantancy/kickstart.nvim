@@ -1,4 +1,8 @@
 -- NOTE: define a common function to be used easily
+-- uses mason-null-ls to install tools
+-- uses none-ls to lint & provide diagnostics (TODO: provide code actions)
+-- uses conform to auto format
+
 function none_ls_setup()
   require('mason').setup()
   require('mason-null-ls').setup {
@@ -29,7 +33,7 @@ end
 
 vim.keymap.set('n', '<leader>f', function()
   require('conform').format { bufnr = 0 }
-end)
+end, { desc = 'conform format' })
 
 return {
   {
