@@ -2,7 +2,19 @@ return {
   {
     'folke/which-key.nvim',
     event = 'VimEnter',
+    keys = {
+      {
+        '<leader>?',
+        function()
+          require('which-key').show { global = false }
+        end,
+        desc = 'Buffer Local Keymaps (which-key)',
+      },
+    },
+    ---@class wk.Opts
     opts = {
+      ---@type false | "classic" | "modern" | "helix"
+      preset = 'helix',
       delay = 0,
       icons = {
         -- set icon mappings to true if you have a Nerd Font
@@ -24,7 +36,7 @@ return {
           ScrollWheelUp = '<ScrollWheelUp> ',
           NL = '<NL> ',
           BS = '<BS> ',
-          Space = '<Space> ',
+          Space = '<Leader> ',
           Tab = '<Tab> ',
           F1 = '<F1>',
           F2 = '<F2>',
@@ -46,7 +58,7 @@ return {
         { '<leader>c', group = 'Code', mode = { 'n', 'x' } },
         { '<leader>d', group = 'Document' },
         { '<leader>r', group = 'Rename' },
-        { '<leader>s', group = 'Search' },
+        { '<leader>f', group = 'Find' },
         { '<leader>w', group = 'Workspace' },
         { '<leader>t', group = 'Toggle' },
         { '<leader>h', group = 'Git Hunk', mode = { 'n', 'v' } },

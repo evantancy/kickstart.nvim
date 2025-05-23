@@ -26,8 +26,9 @@ vim.keymap.set('n', '<leader>k', ':m .-2<CR>==', { noremap = true })
 vim.keymap.set({ 'n', 'v' }, '<leader>d', '"_d')
 vim.keymap.set('x', '<leader>p', '"_dP', { noremap = true })
 vim.keymap.set('n', '<leader>D', '"_D', { noremap = true })
-vim.keymap.set('n', '<leader>C', '"_C', { noremap = true })
-vim.keymap.set('n', '<leader>c', '"_c', { noremap = true })
+-- vim.keymap.set('n', '<leader>C', '"_C', { noremap = true })
+-- NOTE: conflicts with <leader>ca
+-- vim.keymap.set('n', '<leader>c', '"_c', { noremap = true })
 vim.keymap.set('n', '<leader>x', '"_x', { noremap = true })
 
 -- from primeagen
@@ -85,19 +86,19 @@ vim.keymap.set('v', '<', '<gv', { noremap = true })
 vim.keymap.set('v', '>', '>gv', { noremap = true })
 
 vim.keymap.set('n', '<leader>vrc', function()
-  require('telescope.builtin').find_files {
-    prompt_title = '< VimRC Find Files >',
+  require('fzf-lua').files {
+    prompt = '< VimRC Find Files >',
     cwd = '$DOTFILES',
-    hidden = true,
+    -- hidden = true,
   }
 end, { desc = 'VimRC Find Files' })
 
 vim.keymap.set('n', '<leader>vrg', function()
-  require('telescope.builtin').live_grep {
-    prompt_title = '< VimRC Live Grep >',
+  require('fzf-lua').live_grep {
+    prompt = '< VimRC Live Grep >',
     cwd = '$DOTFILES',
   }
-end, { desc = 'VimRC Live [G]rep' })
+end, { desc = 'VimRC Live Grep' })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`

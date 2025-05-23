@@ -3,11 +3,12 @@ vim.opt.mouse = 'a' -- Enable mouse mode, can be useful for resizing splits for 
 vim.opt.errorbells = false -- Disable annoying sounds
 vim.opt.virtualedit = 'block' -- Allow rectangular selections, see https://medium.com/usevim/vim-101-virtual-editing-661c99c05847
 vim.opt.syntax = 'enable' -- Enable syntax highlighting
+vim.cmd [[]]
 
 -- Search
 vim.opt.inccommand = 'split' -- Preview substitutions live, as you type!
 vim.opt.incsearch = true
-vim.opt.hlsearch = false
+vim.opt.hlsearch = true
 
 -- Line Numbers
 vim.opt.number = true
