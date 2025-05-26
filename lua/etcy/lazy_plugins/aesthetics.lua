@@ -18,7 +18,8 @@ return {
       -- refer to the configuration section below
       highlight = {
         -- remove colon compared to default to always match
-        pattern = [[.*<(KEYWORDS)\s*]], -- pattern or table of patterns, used for highlighting (vim regex)
+        pattern = [[.*<(KEYWORDS)\s*]], -- more aggressive pattern
+        -- pattern = [[.*<(KEYWORDS)\s*:]], -- pattern or table of patterns, used for highlighting (vim regex)
       },
       keywords = {
         FIX = {

@@ -14,6 +14,8 @@ return {
           cwd_prompt_shorten_val = 3, -- shortened path parts length
         },
       }
+      -- use fzf-lua as a picker
+      require('fzf-lua').register_ui_select()
 
       vim.keymap.set('n', 'gr', require('fzf-lua').lsp_references, { desc = 'find References' })
       vim.keymap.set('n', 'gi', require('fzf-lua').lsp_implementations, { desc = 'find Implementation' })
@@ -25,6 +27,24 @@ return {
       vim.keymap.set('n', '<leader>fb', require('fzf-lua').buffers, { desc = 'find buffers' })
       vim.keymap.set('n', '<leader>ff', require('fzf-lua').files, { desc = 'find files' })
       vim.keymap.set('n', '<leader>fg', require('fzf-lua').live_grep_resume, { desc = 'find grep' })
+      vim.keymap.set('n', '<leader>f.', function()
+        require('fzf-lua').oldfiles { cwd = vim.uv.cwd() }
+      end, { desc = 'find recent files' })
+
+      vim.keymap.set('n', '<leader>vrc', function()
+        require('fzf-lua').files {
+          prompt = '< VimRC Find Files >',
+          cwd = '$DOTFILES',
+          -- hidden = true,
+        }
+      end, { desc = 'VimRC Find Files' })
+
+      vim.keymap.set('n', '<leader>vrg', function()
+        require('fzf-lua').live_grep {
+          prompt = '< VimRC Live Grep >',
+          cwd = '$DOTFILES',
+        }
+      end, { desc = 'VimRC Live Grep' })
 
       -- vim.keymap.set('n', '<leader>fs', require('fzf-lua').lsp_document_symbols, 'Search Document Symbols')
       vim.keymap.set('n', '<leader>fs', require('fzf-lua').lsp_workspace_symbols, { desc = 'find Symbols' })

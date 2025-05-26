@@ -85,21 +85,6 @@ vim.keymap.set('v', 'D', "y'>p", { noremap = true })
 vim.keymap.set('v', '<', '<gv', { noremap = true })
 vim.keymap.set('v', '>', '>gv', { noremap = true })
 
-vim.keymap.set('n', '<leader>vrc', function()
-  require('fzf-lua').files {
-    prompt = '< VimRC Find Files >',
-    cwd = '$DOTFILES',
-    -- hidden = true,
-  }
-end, { desc = 'VimRC Find Files' })
-
-vim.keymap.set('n', '<leader>vrg', function()
-  require('fzf-lua').live_grep {
-    prompt = '< VimRC Live Grep >',
-    cwd = '$DOTFILES',
-  }
-end, { desc = 'VimRC Live Grep' })
-
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
