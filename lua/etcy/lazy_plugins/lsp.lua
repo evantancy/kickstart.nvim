@@ -36,6 +36,47 @@ vim.keymap.set('n', '<leader>fm', function()
   require('conform').format { bufnr = 0 }
 end, { desc = 'conform format' })
 
+-- Diagnostic Config
+-- See :help vim.diagnostic.Opts
+vim.diagnostic.config {
+  severity_sort = true,
+  update_in_insert = false,
+  float = { border = 'rounded', source = 'if_many' },
+  underline = { severity = vim.diagnostic.severity.ERROR },
+  signs = vim.g.have_nerd_font and {
+    text = {
+      [vim.diagnostic.severity.ERROR] = '󰅚 ',
+      [vim.diagnostic.severity.WARN] = '󰀪 ',
+      [vim.diagnostic.severity.INFO] = '󰋽 ',
+      [vim.diagnostic.severity.HINT] = '󰌶 ',
+    },
+  },
+  virtual_text = {
+    source = 'if_many',
+    spacing = 2,
+    format = function(diagnostic)
+      -- Only show the highest severity diagnostic
+      if diagnostic.severity == vim.diagnostic.severity.ERROR then
+        return diagnostic.message
+      end
+
+      -- Check if there are any ERROR diagnostics at the same line
+      local line_diagnostics = vim.diagnostic.get(0, {
+        lnum = diagnostic.lnum,
+      })
+
+      for _, d in ipairs(line_diagnostics) do
+        if d.severity < diagnostic.severity then
+          -- A more severe diagnostic exists (lower number = higher severity)
+          return nil
+        end
+      end
+
+      return diagnostic.message
+    end,
+  },
+}
+
 return {
   {
     'jay-babu/mason-null-ls.nvim',
