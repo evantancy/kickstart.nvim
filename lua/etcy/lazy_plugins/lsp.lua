@@ -119,6 +119,10 @@ return {
       },
       'saadparwaiz1/cmp_luasnip',
       'onsails/lspkind.nvim',
+
+      'ray-x/lsp_signature.nvim',
+      -- Useful status updates for LSP.
+      { 'j-hui/fidget.nvim', opts = {} },
     },
     ---@diagnostic disable-next-line: unused-local
     config = function(_, opts)
@@ -177,6 +181,9 @@ return {
         },
       }
 
+      -- now configure lsp signature
+      require('lsp_signature').setup {}
+
       local cmp = require 'cmp'
       local lspkind = require 'lspkind'
       require('cmp').setup {
@@ -190,7 +197,7 @@ return {
           ['<C-Space>'] = cmp.mapping.complete(),
           ['<C-c>'] = cmp.mapping.abort(),
           ['<esc>'] = cmp.mapping.abort(),
-          ['<CR>'] = cmp.mapping.confirm { select = true }, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+          -- ['<CR>'] = cmp.mapping.confirm { select = true }, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
           ['<C-y>'] = cmp.mapping.confirm { select = true }, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
           ['<C-j>'] = cmp.mapping.select_next_item(),
           ['<C-k>'] = cmp.mapping.select_prev_item(),
@@ -256,5 +263,18 @@ return {
         },
       }
     end,
+  },
+
+  {
+    'ray-x/lsp_signature.nvim',
+    event = 'InsertEnter',
+    opts = {
+      bind = true,
+      handler_opts = {
+        border = 'rounded',
+      },
+    },
+    ---@diagnostic disable-next-line: unused-local
+    config = function(_, opts) end,
   },
 }
