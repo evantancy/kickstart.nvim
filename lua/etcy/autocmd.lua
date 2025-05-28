@@ -1,3 +1,11 @@
+-- disable blink.cmp for these filetypes via an autocmd
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = _G.custom_ignore_filetypes,
+  callback = function()
+    vim.b.completion = false
+  end,
+})
+
 -- autoformatting
 vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = '*',

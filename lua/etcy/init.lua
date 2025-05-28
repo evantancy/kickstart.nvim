@@ -1,3 +1,13 @@
+_G.custom_ignore_filetypes = {
+  'dirbuf',
+  'dirvish',
+  'fugitive',
+  'TelescopePrompt',
+  'spectre_panel',
+  'snacks_picker_input',
+  'oil',
+}
+
 local source_env_vars = function()
   local handle = io.popen 'EDITOR=cat sops -d ~/.openrouter-api-key.enc 2>/dev/null'
   local result = handle and handle:read '*a' or ''
