@@ -1,3 +1,4 @@
+-- autoformatting
 vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = '*',
   callback = function(args)
@@ -12,7 +13,7 @@ end
 vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(e)
     local opts = { buffer = e.buf }
-    -- Diagnostic keymaps
+    -- Diagnostic navigation keymaps
     vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', merge_opts(opts, { desc = 'Goto prev diagnostic' }))
     vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', merge_opts(opts, { desc = 'Goto next diagnostic' }))
     vim.keymap.set('n', '[e', function()

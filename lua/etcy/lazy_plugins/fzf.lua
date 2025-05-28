@@ -17,16 +17,22 @@ return {
       -- use fzf-lua as a picker
       require('fzf-lua').register_ui_select()
 
-      vim.keymap.set('n', 'gr', require('fzf-lua').lsp_references, { desc = 'find References' })
-      vim.keymap.set('n', 'gi', require('fzf-lua').lsp_implementations, { desc = 'find Implementation' })
-      vim.keymap.set('n', 'gt', require('fzf-lua').lsp_typedefs, { desc = 'find Type Definition' })
+      vim.keymap.set('n', 'gr', require('fzf-lua').lsp_references, { desc = 'find references' })
+      vim.keymap.set('n', 'gd', require('fzf-lua').lsp_definitions, { desc = 'find definitions' })
+      vim.keymap.set('n', 'gi', require('fzf-lua').lsp_implementations, { desc = 'find implementation' })
+      vim.keymap.set('n', 'gt', require('fzf-lua').lsp_typedefs, { desc = 'find type definition' })
+
+      -- WARN: This is not Goto Definition, this is Goto Declaration.
+      --  For example, in C this would take you to the header.
+      vim.keymap.set('n', '<leader>gd', vim.lsp.buf.declaration, { desc = 'Goto Declaration' })
 
       vim.keymap.set('n', '<leader>fz', '<cmd>FzfLua<CR>', { desc = 'FzfLua' })
       vim.keymap.set('n', '<leader><leader>', '<cmd>FzfLua<CR>', { desc = 'FzfLua' })
       vim.keymap.set('n', '<leader>fc', require('fzf-lua').command_history, { desc = 'Open command history in Fzf' })
       vim.keymap.set('n', '<leader>fb', require('fzf-lua').buffers, { desc = 'find buffers' })
       vim.keymap.set('n', '<leader>ff', require('fzf-lua').files, { desc = 'find files' })
-      vim.keymap.set('n', '<leader>fg', require('fzf-lua').live_grep_resume, { desc = 'find grep' })
+      vim.keymap.set('n', '<leader>fr', require('fzf-lua').resume, { desc = 'find resume' })
+      vim.keymap.set('n', '<leader>fg', require('fzf-lua').live_grep, { desc = 'find grep' })
       vim.keymap.set('n', '<leader>f.', function()
         require('fzf-lua').oldfiles { cwd = vim.uv.cwd() }
       end, { desc = 'find recent files' })
@@ -57,10 +63,6 @@ return {
       -- Execute a code action, usually your cursor needs to be on top of an error
       -- or a suggestion from your LSP for this to activate.
       vim.keymap.set({ 'n', 'x' }, '<leader>ca', vim.lsp.buf.code_action, { desc = 'Code Action' })
-
-      -- WARN: This is not Goto Definition, this is Goto Declaration.
-      --  For example, in C this would take you to the header.
-      vim.keymap.set('n', '<leader>gd', vim.lsp.buf.declaration, { desc = 'Goto Declaration' })
     end,
   },
 }

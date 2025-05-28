@@ -63,6 +63,10 @@ vim.keymap.set('n', '[t', function()
   require('todo-comments').jump_prev()
 end, { desc = 'Previous TODO comment' })
 
+-- quickfix list
+vim.keymap.set('n', ']q', ':cnext<cr>', { desc = 'next quickfix list item' })
+vim.keymap.set('n', '[q', ':cprev<cr>', { desc = 'prev quickfix list item' })
+
 -- undotree
 vim.keymap.set('n', '<leader>u', '<cmd>UndotreeToggle<cr>')
 
@@ -73,10 +77,6 @@ vim.keymap.set('c', '<c-k>', '<up>')
 vim.keymap.set('c', '<c-l>', '<right>')
 vim.keymap.set('c', '^', '<home>')
 vim.keymap.set('c', '$', '<end>')
-
--- quickfix list
-vim.keymap.set('n', ']q', ':cnext<cr>')
-vim.keymap.set('n', '[q', ':cprev<cr>')
 
 -- D duplicates highlighted text below
 vim.keymap.set('v', 'D', "y'>p", { noremap = true })
@@ -104,9 +104,9 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- split window management
-vim.keymap.set('n', 'sh', ':split<CR><C-w>w', { silent = true, desc = '[s]plit [h]orizontally' })
-vim.keymap.set('n', 'sv', ':vsplit<CR><C-w>w', { silent = true, desc = '[s]plit [v]ertically' })
-vim.keymap.set('n', 'sc', '<c-w>o<cr>', { silent = true, desc = '[s]plit [c]lose, all other splits but active split' })
+vim.keymap.set('n', 'sh', ':split<CR><C-w>w', { silent = true, desc = 'split horizontally' })
+vim.keymap.set('n', 'sv', ':vsplit<CR><C-w>w', { silent = true, desc = 'split vertically' })
+vim.keymap.set('n', 'sc', '<c-w>o<cr>', { silent = true, desc = 'split close, all other splits but active split' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which

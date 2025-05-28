@@ -49,6 +49,11 @@ vim.diagnostic.config {
   },
 }
 
+-- toggle diagnostics for current buffer
+vim.keymap.set('n', '<leader>td', function()
+  vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+end, { silent = true, noremap = true, desc = '[T]oggle [D]iagnostics' })
+
 return {
   {
     'jay-babu/mason-null-ls.nvim',
@@ -104,6 +109,7 @@ return {
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-cmdline',
       'hrsh7th/nvim-cmp',
+      'lukas-reineke/cmp-under-comparator',
       {
         'L3MON4D3/LuaSnip',
         -- follow latest release.
@@ -114,6 +120,7 @@ return {
       'saadparwaiz1/cmp_luasnip',
       'onsails/lspkind.nvim',
     },
+    ---@diagnostic disable-next-line: unused-local
     config = function(_, opts)
       local lspconfig = require 'lspconfig'
       require('mason-lspconfig').setup {
@@ -171,6 +178,7 @@ return {
       }
 
       local cmp = require 'cmp'
+      local lspkind = require 'lspkind'
       require('cmp').setup {
         window = {
           completion = cmp.config.window.bordered(),
@@ -200,24 +208,50 @@ return {
           debounce = 25,
         },
         formatting = {
-          format = require('lspkind').cmp_format {
-            mode = 'symbol_text', -- show only symbol annotations
-            maxwidth = {
-              -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
-              -- can also be a function to dynamically calculate max width such as
-              -- menu = function() return math.floor(0.45 * vim.o.columns) end,
-              menu = 50, -- leading text (labelDetails)
-              abbr = 50, -- actual suggestion item
-            },
+          format = lspkind.cmp_format {
+            -- maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+            -- can also be a function to dynamically calculate max width such as
+            -- mode = 'symbol',
+            -- show_labelDetails = true, -- show labelDetails in menu. Disabled by default
+            maxwidth = function()
+              return math.floor(0.45 * vim.o.columns)
+            end,
             ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
             show_labelDetails = true, -- show labelDetails in menu. Disabled by default
-
             -- The function below will be called before any actual modifications from lspkind
             -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
-            before = function(entry, vim_item)
-              -- ...
-              return vim_item
+            -- before = function(entry, vim_item)
+            --   return vim_item
+            -- end,
+            -- The function below will be called before any actual modifications from lspkind
+            -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+            before = function(entry, item)
+              local source_mapping = {
+                buffer = '[Buf]',
+                nvim_lsp = '[LSP]',
+                copilot = ' [Copilot]',
+                nvim_lua = '[Lua]',
+                cmp_tabnine = '[TN]',
+                path = '[Path]',
+                luasnip = '[snip]',
+              }
+
+              item.menu = source_mapping[entry.source.name]
+              return item
             end,
+          },
+        },
+        ---@diagnostic disable-next-line: missing-fields
+        sorting = {
+          comparators = {
+            cmp.config.compare.offset,
+            cmp.config.compare.exact,
+            cmp.config.compare.score,
+            require('cmp-under-comparator').under,
+            cmp.config.compare.kind,
+            cmp.config.compare.sort_text,
+            cmp.config.compare.length,
+            cmp.config.compare.order,
           },
         },
       }
