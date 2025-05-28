@@ -21,8 +21,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', ']e', function() vim.diagnostic.goto_next { severity = vim.diagnostic.severity.ERROR } end, merge_opts(opts, { desc = 'Goto next error' }))
     vim.keymap.set('n', '[w', function() vim.diagnostic.goto_prev { severity = vim.diagnostic.severity.WARN } end, merge_opts(opts, { desc = 'Goto previous warning' }))
     vim.keymap.set('n', ']w', function() vim.diagnostic.goto_next { severity = vim.diagnostic.severity.WARN } end, merge_opts(opts, { desc = 'Goto next warning' }))
-    vim.keymap.set('n', ']r', function() require('illuminate').goto_next_reference(wrap) end, merge_opts(opts, { desc = 'go to next reference under cursor' }))
-    vim.keymap.set('n', ']r', function() require('illuminate').goto_prev_reference(wrap) end, merge_opts(opts, { desc = 'go to next reference under cursor' }))
+    -- NOTE: not sure if we should specify `wrap` param
+    vim.keymap.set('n', ']r', function() require('illuminate').goto_next_reference() end, merge_opts(opts, { desc = 'go to next reference under cursor' }))
+    vim.keymap.set('n', '[r', function() require('illuminate').goto_prev_reference() end, merge_opts(opts, { desc = 'go to next reference under cursor' }))
 
     -- LSP keymaps
     vim.keymap.set('n', '<leader>vd', function() vim.diagnostic.open_float() end, opts)
