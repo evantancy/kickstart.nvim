@@ -70,6 +70,7 @@ return {
 
   {
     'stevearc/conform.nvim',
+    lazy = false,
     opts = {},
     config = function(_, opts)
       require('conform').setup {
@@ -103,13 +104,7 @@ return {
     dependencies = {
       { 'mason-org/mason.nvim', opts = {} },
       'neovim/nvim-lspconfig',
-
-      'hrsh7th/cmp-nvim-lsp',
-      'hrsh7th/cmp-buffer',
-      'hrsh7th/cmp-path',
-      'hrsh7th/cmp-cmdline',
-      'hrsh7th/nvim-cmp',
-      'lukas-reineke/cmp-under-comparator',
+      { 'saghen/blink.cmp' },
       {
         'L3MON4D3/LuaSnip',
         -- follow latest release.
@@ -117,10 +112,16 @@ return {
         -- install jsregexp (optional!).
         build = 'make install_jsregexp',
       },
-      'saadparwaiz1/cmp_luasnip',
-      'onsails/lspkind.nvim',
+      -- 'hrsh7th/cmp-nvim-lsp',
+      -- 'hrsh7th/cmp-buffer',
+      -- 'hrsh7th/cmp-path',
+      -- 'hrsh7th/cmp-cmdline',
+      -- 'hrsh7th/nvim-cmp',
+      -- 'lukas-reineke/cmp-under-comparator',
+      -- 'saadparwaiz1/cmp_luasnip',
+      -- 'ray-x/lsp_signature.nvim',
 
-      'ray-x/lsp_signature.nvim',
+      'onsails/lspkind.nvim',
       -- Useful status updates for LSP.
       { 'j-hui/fidget.nvim', opts = {} },
     },
@@ -145,7 +146,17 @@ return {
           --   require('rust-tools').setup {}
           -- end,
           ['lua_ls'] = function()
+            -- NOTE: override as needed and provide as arg
+            local capabilities = {
+              textDocument = {
+                foldingRange = {
+                  dynamicRegistration = false,
+                  lineFoldingOnly = true,
+                },
+              },
+            }
             lspconfig.lua_ls.setup {
+              capabilities = require('blink.cmp').get_lsp_capabilities(),
               settings = {
                 Lua = {
                   diagnostics = {
@@ -164,7 +175,18 @@ return {
           end,
 
           ['pyright'] = function()
+            -- NOTE: override as needed and provide as arg
+            local capabilities = {
+              textDocument = {
+                foldingRange = {
+                  dynamicRegistration = false,
+                  lineFoldingOnly = true,
+                },
+              },
+            }
+
             lspconfig.pyright.setup {
+              capabilities = require('blink.cmp').get_lsp_capabilities(),
               settings = {
                 python = {
                   analysis = {
@@ -181,100 +203,268 @@ return {
         },
       }
 
-      -- now configure lsp signature
-      require('lsp_signature').setup {}
+      -- -- now configure lsp signature
+      -- require('lsp_signature').setup {}
 
-      local cmp = require 'cmp'
-      local lspkind = require 'lspkind'
-      require('cmp').setup {
-        window = {
-          completion = cmp.config.window.bordered(),
-          documentation = cmp.config.window.bordered(),
-        },
-        mapping = cmp.mapping.preset.insert {
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-Space>'] = cmp.mapping.complete(),
-          ['<C-c>'] = cmp.mapping.abort(),
-          ['<esc>'] = cmp.mapping.abort(),
-          -- ['<CR>'] = cmp.mapping.confirm { select = true }, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-          ['<C-y>'] = cmp.mapping.confirm { select = true }, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-          ['<C-j>'] = cmp.mapping.select_next_item(),
-          ['<C-k>'] = cmp.mapping.select_prev_item(),
-        },
-        sources = cmp.config.sources {
-          { name = 'lazydev', group_index = 0 },
-          { name = 'nvim_lsp' },
-          { name = 'luasnip' },
-          { name = 'buffer' },
-          { name = 'path' },
-        },
-        ---@diagnostic disable-next-line: missing-fields
-        performance = {
-          max_view_entries = 10,
-          debounce = 25,
-        },
-        formatting = {
-          format = lspkind.cmp_format {
-            -- maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
-            -- can also be a function to dynamically calculate max width such as
-            -- mode = 'symbol',
-            -- show_labelDetails = true, -- show labelDetails in menu. Disabled by default
-            maxwidth = function()
-              return math.floor(0.45 * vim.o.columns)
-            end,
-            ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
-            show_labelDetails = true, -- show labelDetails in menu. Disabled by default
-            -- The function below will be called before any actual modifications from lspkind
-            -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
-            -- before = function(entry, vim_item)
-            --   return vim_item
-            -- end,
-            -- The function below will be called before any actual modifications from lspkind
-            -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
-            before = function(entry, item)
-              local source_mapping = {
-                buffer = '[Buf]',
-                nvim_lsp = '[LSP]',
-                copilot = ' [Copilot]',
-                nvim_lua = '[Lua]',
-                cmp_tabnine = '[TN]',
-                path = '[Path]',
-                luasnip = '[snip]',
-              }
-
-              item.menu = source_mapping[entry.source.name]
-              return item
-            end,
-          },
-        },
-        ---@diagnostic disable-next-line: missing-fields
-        sorting = {
-          comparators = {
-            cmp.config.compare.offset,
-            cmp.config.compare.exact,
-            cmp.config.compare.score,
-            require('cmp-under-comparator').under,
-            cmp.config.compare.kind,
-            cmp.config.compare.sort_text,
-            cmp.config.compare.length,
-            cmp.config.compare.order,
-          },
-        },
-      }
+      -- local cmp = require 'cmp'
+      -- local lspkind = require 'lspkind'
+      -- require('cmp').setup {
+      --   window = {
+      --     completion = cmp.config.window.bordered(),
+      --     documentation = cmp.config.window.bordered(),
+      --   },
+      --   mapping = cmp.mapping.preset.insert {
+      --     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      --     ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      --     ['<C-Space>'] = cmp.mapping.complete(),
+      --     ['<C-c>'] = cmp.mapping.abort(),
+      --     ['<esc>'] = cmp.mapping.abort(),
+      --     -- ['<CR>'] = cmp.mapping.confirm { select = true }, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+      --     ['<C-y>'] = cmp.mapping.confirm { select = true }, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+      --     ['<C-j>'] = cmp.mapping.select_next_item(),
+      --     ['<C-k>'] = cmp.mapping.select_prev_item(),
+      --   },
+      --   sources = cmp.config.sources {
+      --     { name = 'lazydev', group_index = 0 },
+      --     { name = 'nvim_lsp' },
+      --     { name = 'luasnip' },
+      --     { name = 'buffer' },
+      --     { name = 'path' },
+      --   },
+      --   ---@diagnostic disable-next-line: missing-fields
+      --   performance = {
+      --     max_view_entries = 10,
+      --     debounce = 25,
+      --   },
+      --   formatting = {
+      --     format = lspkind.cmp_format {
+      --       -- maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+      --       -- can also be a function to dynamically calculate max width such as
+      --       -- mode = 'symbol',
+      --       -- show_labelDetails = true, -- show labelDetails in menu. Disabled by default
+      --       maxwidth = function()
+      --         return math.floor(0.45 * vim.o.columns)
+      --       end,
+      --       ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+      --       show_labelDetails = true, -- show labelDetails in menu. Disabled by default
+      --       -- The function below will be called before any actual modifications from lspkind
+      --       -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+      --       -- before = function(entry, vim_item)
+      --       --   return vim_item
+      --       -- end,
+      --       -- The function below will be called before any actual modifications from lspkind
+      --       -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+      --       before = function(entry, item)
+      --         local source_mapping = {
+      --           buffer = '[Buf]',
+      --           nvim_lsp = '[LSP]',
+      --           copilot = ' [Copilot]',
+      --           nvim_lua = '[Lua]',
+      --           cmp_tabnine = '[TN]',
+      --           path = '[Path]',
+      --           luasnip = '[snip]',
+      --         }
+      --
+      --         item.menu = source_mapping[entry.source.name]
+      --         return item
+      --       end,
+      --     },
+      --   },
+      --   ---@diagnostic disable-next-line: missing-fields
+      --   sorting = {
+      --     comparators = {
+      --       cmp.config.compare.offset,
+      --       cmp.config.compare.exact,
+      --       cmp.config.compare.score,
+      --       require('cmp-under-comparator').under,
+      --       cmp.config.compare.kind,
+      --       cmp.config.compare.sort_text,
+      --       cmp.config.compare.length,
+      --       cmp.config.compare.order,
+      --     },
+      --   },
+      -- }
     end,
   },
 
   {
-    'ray-x/lsp_signature.nvim',
-    event = 'InsertEnter',
+    'saghen/blink.cmp',
+    -- optional: provides snippets for the snippet source
+    dependencies = { 'rafamadriz/friendly-snippets', 'folke/lazydev.nvim' },
+
+    -- use a release tag to download pre-built binaries
+    version = '1.*',
+    -- AND/OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+    -- build = 'cargo build --release',
+    -- If you use nix, you can build from source using latest nightly rust with:
+    -- build = 'nix run .#build-plugin',
+
+    ---@module 'blink.cmp'
+    ---@type blink.cmp.Config
     opts = {
-      bind = true,
-      handler_opts = {
-        border = 'rounded',
+      -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
+      -- 'super-tab' for mappings similar to vscode (tab to accept)
+      -- 'enter' for enter to accept
+      -- 'none' for no mappings
+      --
+      -- All presets have the following mappings:
+      -- C-space: Open menu or open docs if already open
+      -- C-n/C-p or Up/Down: Select next/previous item
+      -- C-e: Hide menu
+      -- C-k: Toggle signature help (if signature.enabled = true)
+      --
+      -- See :h blink-cmp-config-keymap for defining your own keymap
+      keymap = {
+        -- set to 'none' to disable the 'default' preset
+        preset = 'default',
+
+        ['<C-y>'] = { 'select_and_accept' },
+        ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+        ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
+        ['<C-k>'] = { 'select_prev', 'fallback_to_mappings' },
+        ['<C-j>'] = { 'select_next', 'fallback_to_mappings' },
+        ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+        ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+
+        -- disable a keymap from the preset
+        ['<CR>'] = {},
+        ['<C-e>'] = {},
+        ['<Up>'] = {},
+        ['<Down>'] = {},
+
+        -- show with a list of providers
+        ['<C-space>'] = {
+          function(cmp)
+            cmp.show { providers = { 'snippets' } }
+          end,
+        },
       },
+
+      appearance = {
+        -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+        -- Adjusts spacing to ensure icons are aligned
+        nerd_font_variant = 'mono',
+      },
+
+      -- (Default) Only show the documentation popup when manually triggered
+      completion = {
+        -- documentation = { auto_show = true, auto_show_delay_ms = 300, treesitter_highlighting = false },
+        documentation = { auto_show = true },
+        list = {
+          max_items = 30,
+          selection = {
+            -- When `true`, will automatically select the first item in the completion list
+            preselect = true,
+            -- preselect = function(ctx) return vim.bo.filetype ~= 'markdown' end,
+
+            -- When `true`, inserts the completion item automatically when selecting it
+            -- You may want to bind a key to the `cancel` command (default <C-e>) when using this option,
+            -- which will both undo the selection and hide the completion menu
+            auto_insert = true,
+            -- auto_insert = function(ctx) return vim.bo.filetype ~= 'markdown' end
+          },
+          cycle = {
+            -- When `true`, calling `select_next` at the _bottom_ of the completion list
+            -- will select the _first_ completion item.
+            from_bottom = true,
+            -- When `true`, calling `select_prev` at the _top_ of the completion list
+            -- will select the _last_ completion item.
+            from_top = true,
+          },
+        },
+        menu = {
+          draw = {
+            columns = { { 'label', 'label_description', gap = 1 }, { 'kind_icon', gap = 1 }, { 'kind' } },
+            components = {
+              kind_icon = {
+                text = function(ctx)
+                  local icon = ctx.kind_icon
+                  if vim.tbl_contains({ 'Path' }, ctx.source_name) then
+                    local dev_icon, _ = require('nvim-web-devicons').get_icon(ctx.label)
+                    if dev_icon then
+                      icon = dev_icon
+                    end
+                  else
+                    icon = require('lspkind').symbolic(ctx.kind, {
+                      mode = 'symbol',
+                    })
+                  end
+
+                  return icon .. ctx.icon_gap
+                end,
+
+                -- Optionally, use the highlight groups from nvim-web-devicons
+                -- You can also add the same function for `kind.highlight` if you want to
+                -- keep the highlight groups in sync with the icons.
+                highlight = function(ctx)
+                  local hl = ctx.kind_hl
+                  if vim.tbl_contains({ 'Path' }, ctx.source_name) then
+                    local dev_icon, dev_hl = require('nvim-web-devicons').get_icon(ctx.label)
+                    if dev_icon then
+                      hl = dev_hl
+                    end
+                  end
+                  return hl
+                end,
+              },
+            },
+          },
+        },
+      },
+
+      -- Default list of enabled providers defined so that you can extend it
+      -- elsewhere in your config, without redefining it, due to `opts_extend`
+      sources = {
+        -- default ={ 'lsp', 'path', 'snippets', 'buffer' }
+        default = function()
+          local sources = { 'lsp', 'buffer' }
+          local ok, node = pcall(vim.treesitter.get_node)
+
+          if ok and node then
+            if not vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
+              table.insert(sources, 'path')
+            end
+            if node:type() ~= 'string' then
+              table.insert(sources, 'snippets')
+            end
+          end
+
+          return sources
+        end,
+
+        per_filetype = {
+          sql = { 'dadbod' },
+          -- optionally inherit from the `default` sources
+          lua = { inherit_defaults = true },
+        },
+      },
+      providers = {
+        lazydev = {
+          name = 'LazyDev',
+          module = 'lazydev.integrations.blink',
+          -- make lazydev completions top priority (see `:h blink.cmp`)
+          score_offset = 100,
+        },
+      },
+
+      -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
+      -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
+      -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
+      --
+      -- See the fuzzy documentation for more information
+      fuzzy = { implementation = 'prefer_rust_with_warning' },
+      snippets = { preset = 'luasnip' },
+      ghost_text = { enabled = false },
+      signature = { enabled = true },
     },
-    ---@diagnostic disable-next-line: unused-local
-    config = function(_, opts) end,
+    opts_extend = { 'sources.default' },
+
+    -- NOTE: this is for neovim 0.11+
+    -- config = function(_, opts)
+    --   require('blink.cmp').setup(opts)
+    --
+    --   -- Extend neovim's client capabilities with the completion ones.
+    --   vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities(nil, true) })
+    -- end,
   },
 }
