@@ -134,6 +134,7 @@ return {
           'lua_ls',
           'gopls',
           'pyright',
+          -- 'pylsp',
           -- 'sourcery',
           'ts_ls',
         },
@@ -173,6 +174,23 @@ return {
               },
             }
           end,
+
+          -- ['pylsp'] = function()
+          --   lspconfig.pylsp.setup {
+          --     capabilities = false,
+          --     settings = {
+          --       pylsp = {
+          --         enable = true,
+          --         configurationSources = { 'ruff' },
+          --         plugins = {
+          --           jedi_rename = { enabled = false },
+          --           rope_rename = { enabled = false },
+          --           pylsp_rope = { enabled = true },
+          --         },
+          --       },
+          --     },
+          --   }
+          -- end,
 
           ['pyright'] = function()
             -- NOTE: override as needed and provide as arg
