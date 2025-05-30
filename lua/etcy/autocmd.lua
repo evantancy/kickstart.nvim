@@ -1,3 +1,22 @@
+vim.api.nvim_create_autocmd('BufEnter', {
+  pattern = '*',
+  callback = function()
+    -- explicitly enable c and r
+    -- for <r> Pressing Enter will continue comments
+    vim.opt_local.formatoptions:append 'cr'
+    -- explicitly disable <o>, so <o> and <O> don't continue comments
+    vim.opt_local.formatoptions:remove 'o'
+  end,
+})
+
+vim.api.nvim_create_autocmd('TextYankPost', {
+  desc = 'Highlight when yanking (copying) text',
+  group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
+  callback = function()
+    vim.highlight.on_yank { timeout = 150 }
+  end,
+})
+
 -- disable blink.cmp for these filetypes via an autocmd
 vim.api.nvim_create_autocmd('FileType', {
   pattern = _G.custom_ignore_filetypes,
@@ -11,6 +30,8 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = '*',
   callback = function(args)
     require('conform').format { bufnr = args.buf }
+
+    vim.cmd [[%s/\s\+$//e]]
   end,
 })
 
