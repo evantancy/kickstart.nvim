@@ -64,3 +64,16 @@ require('lazy').setup {
 require 'etcy.autocmd'
 require 'etcy.opt'
 require 'etcy.set'
+-- Close all but current buffer
+vim.api.nvim_create_user_command('CloseAllButCurrent', function()
+  vim.cmd [[%bd|e#|bd#]]
+end, {})
+
+-- Quick fix stuff
+vim.api.nvim_create_user_command('QuickFixClear', function()
+  vim.fn.setqflist({}, 'r')
+end, {})
+
+vim.api.nvim_create_user_command('QuickFixUndo', function()
+  vim.cmd [[cdo :norm! u]]
+end, {})
