@@ -4,20 +4,37 @@
 -- uses conform to auto format
 -- use nvim-lspconfig for enabling LSP features
 
+-- NOTE: external links for LSP config
+-- https://github.com/nvimtools/none-ls.nvim/blob/main/doc/BUILTINS.md
+-- https://github.com/jay-babu/mason-null-ls.nvim#primary-source-of-truth-is-mason-null-ls
+-- https://mason-registry.dev/registry/list
+local linters_formatters = {
+  'stylua',
+  'jq',
+  'ruff',
+  'gopls',
+  'gofumpt',
+  -- 'mypy',
+  'shfmt',
+  'shellcheck',
+}
+
+local lsp_servers = {
+
+  'lua_ls',
+  'gopls',
+  'pyright',
+  -- 'pylsp',
+  -- 'sourcery',
+  'ts_ls',
+  'bashls',
+}
+
 local function none_ls_setup()
   require('mason').setup()
   require('mason-null-ls').setup {
     -- use to auto install tools
-    ensure_installed = {
-      'stylua',
-      'jq',
-      'ruff',
-      'gopls',
-      'gofumpt',
-      -- 'mypy',
-      'shfmt',
-      'shellcheck',
-    },
+    ensure_installed = linters_formatters,
     automatic_installation = true,
     handlers = {},
   }
@@ -150,15 +167,7 @@ return {
       local lspconfig = require 'lspconfig'
       require('mason-lspconfig').setup {
         automatic_installation = true,
-        ensure_installed = {
-          'lua_ls',
-          'gopls',
-          'pyright',
-          -- 'pylsp',
-          -- 'sourcery',
-          'ts_ls',
-          'bashls',
-        },
+        ensure_installed = lsp_servers,
         handlers = {
           function(server_name) -- default handler (optional)
             require('lspconfig')[server_name].setup {}
@@ -589,7 +598,20 @@ return {
     build = 'make install',
     config = function()
       vim.g.pydocstring_formatter = 'google' -- 'google', 'numpy', 'sphinx'
+      vim.g.pydocstring_ignore_init = 0 -- don't ignore __init__
+      vim.g.pydocstring_enable_mapping = 0 --disable default keymaps
       vim.keymap.set('n', '<leader>dg', '<Plug>(pydocstring)', { desc = 'docstring generate' })
+    end,
+  },
+
+  {
+    'danymat/neogen',
+    -- Uncomment next line if you want to follow only stable versions
+    version = '*',
+    config = function()
+      require('neogen').setup {}
+      local opts = { noremap = true, silent = true }
+      vim.api.nvim_set_keymap('n', '<Leader>ng', ":lua require('neogen').generate()<CR>", opts)
     end,
   },
 
