@@ -1,23 +1,20 @@
 return {
-
-  -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
-  --
-  -- This is often very useful to both group configuration, as well as handle
-  -- lazy loading plugins that don't need to be loaded immediately at startup.
-  --
-  -- For example, in the following configuration, we use:
-  --  event = 'VimEnter'
-  --
-  -- which loads which-key before all the UI elements are loaded. Events can be
-  -- normal autocommands events (`:help autocmd-events`)
-  --
-  -- Then, because we use the `opts` key (recommended), the configuration runs
-  -- after the plugin has been loaded as `require(MODULE).setup(opts)`.
-
-  { -- Useful plugin to show you pending keybinds.
+  {
     'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+    event = 'VimEnter',
+    keys = {
+      {
+        '<leader>?',
+        function()
+          require('which-key').show { global = false }
+        end,
+        desc = 'Buffer Local Keymaps (which-key)',
+      },
+    },
+    ---@class wk.Opts
     opts = {
+      ---@type false | "classic" | "modern" | "helix"
+      preset = 'helix',
       delay = 0,
       icons = {
         -- set icon mappings to true if you have a Nerd Font
@@ -39,7 +36,7 @@ return {
           ScrollWheelUp = '<ScrollWheelUp> ',
           NL = '<NL> ',
           BS = '<BS> ',
-          Space = '<Space> ',
+          Space = '<Leader> ',
           Tab = '<Tab> ',
           F1 = '<F1>',
           F2 = '<F2>',
@@ -58,13 +55,13 @@ return {
 
       -- Document existing key chains
       spec = {
-        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>r', group = '[R]ename' },
-        { '<leader>s', group = '[S]earch' },
-        { '<leader>w', group = '[W]orkspace' },
-        { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>c', group = 'Code', mode = { 'n', 'x' } },
+        { '<leader>d', group = 'Document' },
+        { '<leader>r', group = 'Rename' },
+        { '<leader>f', group = 'Find' },
+        { '<leader>w', group = 'Workspace' },
+        { '<leader>t', group = 'Toggle' },
+        { '<leader>h', group = 'Git Hunk', mode = { 'n', 'v' } },
       },
     },
   },
