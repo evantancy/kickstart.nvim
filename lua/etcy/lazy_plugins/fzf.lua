@@ -48,7 +48,13 @@ return {
       vim.keymap.set('n', '<leader>fb', require('fzf-lua').buffers, { desc = 'find buffers' })
       vim.keymap.set('n', '<leader>ff', require('fzf-lua').files, { desc = 'find files' })
       vim.keymap.set('n', '<leader>fr', require('fzf-lua').resume, { desc = 'find resume' })
-      vim.keymap.set('n', '<leader>fg', require('fzf-lua').live_grep, { desc = 'find grep' })
+      vim.keymap.set('n', '<leader>fG', require('fzf-lua').live_grep, { desc = 'find grep' })
+      vim.keymap.set('n', '<leader>fg', require('fzf-lua').live_grep_glob, { desc = 'find grep with glob opts' })
+      vim.keymap.set('n', '<leader>fw', function()
+        require('fzf-lua').grep { search = vim.fn.expand '<cword>' }
+      end, { desc = 'find grep current word' })
+      vim.keymap.set('n', '<leader>/', require('fzf-lua').blines, { desc = 'current buffer fuzzy' })
+
       vim.keymap.set('n', '<leader>f.', function()
         require('fzf-lua').oldfiles { cwd = vim.uv.cwd() }
       end, { desc = 'find recent files' })
