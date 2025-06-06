@@ -7,6 +7,7 @@ return {
     build = ':TSUpdate',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
+      'lukas-reineke/indent-blankline.nvim',
     },
     config = function()
       local treesitter_parsers =

@@ -47,6 +47,7 @@ return {
           ['gx'] = 'actions.open_external',
           ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
           ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
+          -- ['U'] = { 'actions.discard_all_changes', mode = 'n' },
         },
       }
     end,
@@ -83,24 +84,10 @@ return {
             return labels
           end
 
-          local function get_diagnostic_label()
-            local icons = { error = 'E', warn = 'W', info = 'I', hint = 'H' }
-            local label = {}
-
-            for severity, icon in pairs(icons) do
-              local n = #vim.diagnostic.get(props.buf, { severity = vim.diagnostic.severity[string.upper(severity)] })
-              if n > 0 then
-                table.insert(label, { icon .. n .. ' ', group = 'DiagnosticSign' .. severity })
-              end
-            end
-            if #label > 0 then
-              table.insert(label, { '┊ ' })
-            end
-            return label
-          end
+          local diagnostics = require 'etcy.utils.diagnostics'
 
           return {
-            { get_diagnostic_label() },
+            { diagnostics.get_diagnostic_label_table(props.buf) },
             { get_git_diff() },
             { (ft_icon or '') .. ' ', guifg = ft_color, guibg = 'none' },
             { filename .. ' ', gui = vim.bo[props.buf].modified and 'bold,italic' or 'bold' },

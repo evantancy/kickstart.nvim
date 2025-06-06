@@ -40,33 +40,55 @@ return {
     'nvim-lualine/lualine.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     config = function()
+      local diagnostics = require 'etcy.utils.diagnostics'
+      local trouble = require 'trouble'
+      local symbols = trouble.statusline {
+        mode = 'lsp_document_symbols',
+        groups = {},
+        title = false,
+        filter = { range = true },
+        format = '{kind_icon}{symbol.name:Normal}',
+        hl_group = 'lualine_c_normal',
+      }
+
       require('lualine').setup {
         sections = {
           lualine_a = { 'mode' },
           lualine_b = {
             'branch',
             'diff',
+          },
+          lualine_c = {
             {
               'diagnostics',
 
               -- Table of diagnostic sources, available sources are:
               --   'nvim_lsp', 'nvim_diagnostic', 'nvim_workspace_diagnostic', 'coc', 'ale', 'vim_lsp'.
               -- or a function that returns a table as such:
-
-              ---@diagnostic disable-next-line: undefined-global
-              { error = error_cnt, warn = warn_cnt, info = info_cnt, hint = hint_cnt },
-              sources = { 'nvim_lsp' },
+              --   { error=error_cnt, warn=warn_cnt, info=info_cnt, hint=hint_cnt }
+              sources = { 'nvim_workspace_diagnostic' },
 
               -- Displays diagnostics for the defined severity types
               sections = { 'error', 'warn', 'info', 'hint' },
+
+              diagnostics_color = {
+                -- Same values as the general color option can be used here.
+                error = 'DiagnosticError', -- Changes diagnostics' error color.
+                warn = 'DiagnosticWarn', -- Changes diagnostics' warn color.
+                info = 'DiagnosticInfo', -- Changes diagnostics' info color.
+                hint = 'DiagnosticHint', -- Changes diagnostics' hint color.
+              },
               symbols = { error = 'E', warn = 'W', info = 'I', hint = 'H' },
               colored = true, -- Displays diagnostics status in color if set to true.
               update_in_insert = false, -- Update diagnostics in insert mode.
               always_visible = false, -- Show diagnostics even if there are none.
             },
+            {
+              symbols.get,
+              cond = symbols.has,
+            },
           },
-          lualine_c = { 'filename' },
-          lualine_x = { 'encoding' },
+          lualine_x = { 'filename' },
           lualine_y = { 'filetype' },
           lualine_z = { 'location' },
         },
@@ -77,6 +99,7 @@ return {
   {
     'Bekaboo/dropbar.nvim',
     tag = 'v12.0.2',
+    enabled = true,
     -- optional, but required for fuzzy finder support
     dependencies = {
       'nvim-telescope/telescope-fzf-native.nvim',
@@ -91,20 +114,25 @@ return {
   },
 
   {
-    'lukas-reineke/indent-blankline.nvim',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter',
-    },
-    main = 'ibl',
-    ---@module "ibl"
-    ---@type ibl.config
-    opts = {
-      scope = {
-        enabled = true,
-      },
-    },
+    -- NOTE: disabled due to being slow in general for bigger codebases
+    'nvim-treesitter/nvim-treesitter-context',
+    enabled = false,
     config = function()
-      require('ibl').setup()
+      require('treesitter-context').setup {
+        enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+        multiwindow = false, -- Enable multiwindow support.
+        max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+        min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+        line_numbers = true,
+        multiline_threshold = 10, -- Maximum number of lines to show for a single context
+        trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+        mode = 'cursor', -- Line used to calculate context. Choices: 'cursor', 'topline'
+        -- Separator between context and content. Should be a single character string, like '-'.
+        -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+        separator = nil,
+        zindex = 20, -- The Z-index of the context window
+        on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+      }
     end,
   },
 
