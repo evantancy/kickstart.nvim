@@ -1,10 +1,28 @@
+-- vim.api.nvim_create_autocmd('FileType', {
+--   pattern = 'oil_preview',
+--   callback = function(args)
+--     vim.keymap.set('n', 'u', function()
+--       -- vim.api.nvim_win_close(0, true)
+--       require('oil').discard_all_changes()
+--     end, { buffer = args.buf })
+--   end,
+-- })
+
 return {
+  {
+    'refractalize/oil-git-status.nvim',
+    dependencies = {
+      'stevearc/oil.nvim',
+    },
+    config = true,
+  },
+
   {
     'stevearc/oil.nvim',
     ---@module 'oil'
     ---@type oil.SetupOpts
     opts = {},
-    dependencies = { 'nvim-tree/nvim-web-devicons' }, -- use if you prefer nvim-web-devicons
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
     -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
     lazy = false,
     config = function(_, opts)
@@ -15,6 +33,9 @@ return {
         float = {
           max_width = 0.5,
           max_height = 0.5,
+        },
+        win_options = {
+          signcolumn = 'yes:2',
         },
 
         skip_confirm_for_simple_edits = true,
@@ -47,11 +68,17 @@ return {
           ['gx'] = 'actions.open_external',
           ['g.'] = { 'actions.toggle_hidden', mode = 'n' },
           ['g\\'] = { 'actions.toggle_trash', mode = 'n' },
-          -- ['U'] = { 'actions.discard_all_changes', mode = 'n' },
+          ['<leader>u'] = {
+            function()
+              require('oil').discard_all_changes()
+            end,
+            mode = 'n',
+          },
         },
       }
     end,
   },
+
   {
     'b0o/incline.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons', 'lewis6991/gitsigns.nvim' },
