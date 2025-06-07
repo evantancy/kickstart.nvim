@@ -11,16 +11,25 @@
 local linters_formatters = {
   'stylua',
   'jq',
-  'ruff',
-  'gopls',
+  'refactoring',
+  -- GOLANG TOOLS
   'gofumpt',
+  'goimports',
+  'impl', -- code action
+  'gomodifytags', -- code action
+  'golangci-lint',
+  'golines',
+
+  -- PYTHON TOOLS
+  'ruff',
   -- 'mypy',
+
+  -- BASH TOOLS
   'shfmt',
   'shellcheck',
 }
 
 local lsp_servers = {
-
   'lua_ls',
   'gopls',
   'pyright',
@@ -39,16 +48,24 @@ local function none_ls_setup()
     handlers = {},
   }
 
-  local none_ls = require 'null-ls'
+  local null_ls = require 'null-ls'
 
   -- use none-ls for linter & diagnostics
-  none_ls.setup {
+  null_ls.setup {
     sources = {
-      none_ls.builtins.formatting.stylua,
-      none_ls.builtins.completion.spell,
+      null_ls.builtins.formatting.stylua,
+      null_ls.builtins.completion.spell,
       -- none_ls.builtins.diagnostics.mypy,
-      none_ls.builtins.formatting.shfmt,
-      none_ls.builtins.code_actions.refactoring,
+      null_ls.builtins.formatting.shfmt,
+      -- GOLANG
+      null_ls.builtins.formatting.gofumpt,
+      null_ls.builtins.formatting.goimports,
+      null_ls.builtins.formatting.golines,
+      null_ls.builtins.diagnostics.golangci_lint,
+
+      null_ls.builtins.code_actions.impl,
+      null_ls.builtins.code_actions.refactoring,
+      null_ls.builtins.code_actions.gomodifytags,
 
       -- require("none-ls.diagnostics.eslint"), -- requires none-ls-extras.nvim
     },
@@ -77,6 +94,11 @@ vim.keymap.set('n', '<leader>td', function()
   vim.diagnostic.enable(not vim.diagnostic.is_enabled())
 end, { silent = true, noremap = true, desc = '[T]oggle [D]iagnostics' })
 
+-- toggle inlay hints for current buffer
+vim.keymap.set('n', '<leader>th', function()
+  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+end, { silent = true, noremap = true, desc = '[T]oggle [H]ints' })
+
 return {
   {
     'ThePrimeagen/refactoring.nvim',
@@ -104,6 +126,7 @@ return {
 
   {
     'stevearc/conform.nvim',
+    dependencies = { 'jay-babu/mason-null-ls.nvim' },
     lazy = false,
     opts = {},
     config = function(_, opts)
@@ -117,6 +140,7 @@ return {
           zsh = { 'shfmt' },
           bash = { 'shfmt' },
           sh = { 'shfmt' },
+          go = { 'goimports', 'gofumpt', 'golines' },
         },
       }
     end,
@@ -170,12 +194,57 @@ return {
         ensure_installed = lsp_servers,
         handlers = {
           function(server_name) -- default handler (optional)
-            require('lspconfig')[server_name].setup {}
+            require('lspconfig')[server_name].setup {
+              on_attach = function(client, bufnr)
+                if client.server_capabilities.inlayHintProvider then
+                  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                end
+              end,
+            }
           end,
           -- Next, you can provide targeted overrides for specific servers.
           -- ['rust_analyzer'] = function()
           --   require('rust-tools').setup {}
           -- end,
+
+          ['gopls'] = function()
+            -- NOTE: override as needed and provide as arg
+            local capabilities = {
+              textDocument = {
+                foldingRange = {
+                  dynamicRegistration = false,
+                  lineFoldingOnly = true,
+                },
+              },
+            }
+            lspconfig.gopls.setup {
+              capabilities = require('blink.cmp').get_lsp_capabilities(),
+              settings = {
+                gopls = {
+                  analyses = {
+                    unusedparams = true,
+                  },
+                  staticcheck = true,
+                  gofumpt = true,
+                  hints = {
+                    assignVariableTypes = true,
+                    compositeLiteralFields = true,
+                    compositeLiteralTypes = true,
+                    constantValues = true,
+                    functionTypeParameters = true,
+                    parameterNames = true,
+                    rangeVariableTypes = true,
+                  },
+                },
+              },
+              on_attach = function(client, bufnr)
+                if client.server_capabilities.inlayHintProvider then
+                  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                end
+              end,
+            }
+          end,
+
           ['lua_ls'] = function()
             -- NOTE: override as needed and provide as arg
             local capabilities = {
@@ -200,10 +269,25 @@ return {
                       indent_size = '2',
                     },
                   },
+                  hint = {
+                    enable = true,
+                    arrayIndex = 'Auto',
+                    await = true,
+                    paramName = 'All',
+                    paramType = true,
+                    semicolon = 'SameLine',
+                    setType = false,
+                  },
                 },
               },
+              on_attach = function(client, bufnr)
+                if client.server_capabilities.inlayHintProvider then
+                  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                end
+              end,
             }
           end,
+
           ['bashls'] = function()
             lspconfig.bashls.setup {}
           end,
@@ -246,9 +330,18 @@ return {
                     useLibraryCodeForTypes = true,
                     autoImportCompletions = true,
                     typeCheckingMode = 'strict',
+                    inlayHints = {
+                      variableTypes = true,
+                      functionReturnTypes = true,
+                    },
                   },
                 },
               },
+              on_attach = function(client, bufnr)
+                if client.server_capabilities.inlayHintProvider then
+                  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+                end
+              end,
             }
           end,
         },

@@ -9,6 +9,10 @@ return {
       require('fzf-lua').setup {
         { 'telescope', 'fzf-native' },
 
+        lsp = {
+          -- make lsp requests synchronous so they work with null-ls
+          async_or_timeout = 3000,
+        },
         winopts = { preview = { default = 'bat', layout = 'vertical', vertical = 'up:70%' } },
         -- specific picker options
         files = {

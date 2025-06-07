@@ -43,7 +43,7 @@ vim.opt.undofile = true -- Save undo history
 vim.opt.undodir = os.getenv 'XDG_DATA_HOME' .. '/.vim/undodir'
 
 -- Keep signcolumn on by default
-vim.opt.signcolumn = 'yes'
+vim.opt.signcolumn = 'yes:2'
 
 -- Looks
 vim.opt.colorcolumn = '80' -- show column
