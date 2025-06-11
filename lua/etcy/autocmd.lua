@@ -17,6 +17,25 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Auto-reload files changed outside vim
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
+  pattern = '*',
+  callback = function()
+    if vim.fn.mode() ~= 'c' then
+      vim.cmd 'checktime'
+    end
+  end,
+})
+
+-- TODO: verify this works
+-- -- Refresh diagnostics when file changes
+-- vim.api.nvim_create_autocmd({ 'BufWritePost', 'InsertLeave' }, {
+--   pattern = '*',
+--   callback = function()
+--     vim.diagnostic.refresh()
+--   end,
+-- })
+
 -- disable blink.cmp for these filetypes via an autocmd
 vim.api.nvim_create_autocmd('FileType', {
   pattern = _G.custom_ignore_filetypes,

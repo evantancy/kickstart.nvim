@@ -55,6 +55,9 @@ vim.opt.termguicolors = true
 vim.opt.updatetime = 100
 vim.opt.timeoutlen = 200 -- Decrease mapped sequence wait time
 
+-- Auto-read files when changed outside vim
+vim.opt.autoread = true
+
 -- Configure how new splits should be opened
 vim.opt.splitright = true
 vim.opt.splitbelow = true
