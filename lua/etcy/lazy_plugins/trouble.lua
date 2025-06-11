@@ -20,16 +20,17 @@ return {
           },
           mode = 'diagnostics',
 
-          ---@type trouble.Window.opts
-          preview = {
-            type = 'split',
-            relative = 'win',
-            position = 'right',
-            size = 0.4,
-          },
+          -- ---@type trouble.Window.opts
+          -- preview = {
+          --   type = 'split',
+          --   relative = 'win',
+          --   position = 'right',
+          --   size = 0.4,
+          -- },
           filter = {
             any = {
-              buf = 0, -- current buffer
+              -- NOTE: remove buffer limitation once more stable
+              -- buf = 0, -- current buffer
               {
                 severity = { vim.diagnostic.severity.ERROR, vim.diagnostic.severity.WARN },
                 -- NOTE: limit to files in the current project

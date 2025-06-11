@@ -80,7 +80,7 @@ end, { desc = 'conform format' })
 -- See :help vim.diagnostic.Opts
 vim.diagnostic.config {
   severity_sort = true,
-  update_in_insert = false,
+  update_in_insert = true,
   float = { border = 'rounded', source = 'if_many' },
   underline = { severity = vim.diagnostic.severity.ERROR },
   virtual_text = {
@@ -195,8 +195,9 @@ return {
         handlers = {
           function(server_name) -- default handler (optional)
             require('lspconfig')[server_name].setup {
+              capabilities = require('blink.cmp').get_lsp_capabilities(),
               on_attach = function(client, bufnr)
-                if client.server_capabilities.inlayHintProvider then
+                if client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint.is_enabled { bufnr = bufnr } then
                   vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
                 end
               end,
@@ -237,11 +238,6 @@ return {
                   },
                 },
               },
-              on_attach = function(client, bufnr)
-                if client.server_capabilities.inlayHintProvider then
-                  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-                end
-              end,
             }
           end,
 
@@ -280,11 +276,6 @@ return {
                   },
                 },
               },
-              on_attach = function(client, bufnr)
-                if client.server_capabilities.inlayHintProvider then
-                  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-                end
-              end,
             }
           end,
 
@@ -337,11 +328,6 @@ return {
                   },
                 },
               },
-              on_attach = function(client, bufnr)
-                if client.server_capabilities.inlayHintProvider then
-                  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-                end
-              end,
             }
           end,
         },
